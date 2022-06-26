@@ -56,7 +56,7 @@ function fbfu_convert_relative_path {
 #@param 字符串
 #@return 转换后的字符串
 function fbfu_string_slim {
-	echo "$1" | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//"
+    echo "$1" | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//"
 }
 
 #@brief 计算字符串中某个符号的个数
@@ -64,6 +64,6 @@ function fbfu_string_slim {
 #@param 符号
 #@return 个数
 function fbfu_string_symbol_num {
-	local fbar_p=$(echo "$1" | sed -e "s/[^$2]//g")
-	echo ${#fbar_p}
+    local fbar_p=$(echo "$1" | sed -e "s/[^$2]//g")
+    echo ${#fbar_p}
 }
