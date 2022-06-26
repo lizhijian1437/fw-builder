@@ -51,3 +51,10 @@ function fbfu_convert_relative_path {
     echo "/${fbar_convert_result}"
     return 0
 }
+
+#@brief 删除字符串前后空白字符
+#@param 字符串
+#@return 转换后的字符串
+function fbfu_slim {
+	echo "$1" | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//"
+}
