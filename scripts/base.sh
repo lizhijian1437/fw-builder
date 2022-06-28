@@ -67,3 +67,33 @@ function fbfu_string_symbol_num {
     local fbar_p=$(echo "$1" | sed -e "s/[^$2]//g")
     echo ${#fbar_p}
 }
+
+#@brief 检查字符串中是否有变量
+#@param 字符串
+#@return true表示有变量，false表示无变量
+#@note 限定变量必须为${...}格式，并且变量名只能由字母、数字以及_-组成
+function fbfu_check_variable {
+    local fbar_check=$(echo "$1" | grep '\${[A-Za-z0-9_-]*}')
+    if [ "$fbar_check" == "" ];then
+        echo "false"
+        return 0
+    else
+        echo "true"
+        return 1
+    fi
+}
+
+#@brief 转换字符串中的变量
+#@param 字符串
+#@return 转换后的字符串
+#@note 限定变量必须为${...}格式，并且变量名只能由字母、数字以及_-组成
+function fbfu_convert_variable {
+    local fbar_check=$(fbfu_check_variable "$1")
+    if [ "$fbar_check" == "false" ];then
+        echo "$1"
+        return 0
+    else
+        eval echo "$1"
+        return 1
+    fi    
+}
