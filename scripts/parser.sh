@@ -136,6 +136,7 @@ function fbfu_parse {
     local fbar_key=$2
     local fbar_temp_path=$3
     local fbar_check_section=""
+    local fbar_variable=""
     local fbar_command=""
     if [ ! -f "$fbar_file" ] || [ "$fbar_key" == "" ];then
         return 0;
@@ -144,18 +145,27 @@ function fbfu_parse {
     if [ "$fbar_value" == "" ];then
         return 0
     fi
-    fbar_check_section=$(echo "$fbar_value" | grep '^\{')
+    fbar_check_section=$(echo "$fbar_value" | grep '^{')
     if [ "$fbar_check_section" != "" ];then
         fbar_value=$(fbfr_section "$fbar_file" "$fbar_key" "{" "}")
         if [ "$fbar_value" == "" ];then
             return 0
-        else
-            echo "$fbar_value"
-            return 2
         fi
+        fbar_value=$(echo "$fbar_value" | tr -s "\r\n" " ")
+        fbar_variable=$(fbfu_check_variable "$fbar_value")
+        if [ "$fbar_variable" == "true" ];then
+            fbar_value=$(echo "$fbar_value" | sed -e "s/\"/\\\\\"/g")
+            fbar_value=$(fbfu_convert_variable "$fbar_value")
+        fi
+        echo "$fbar_value"
+        return 2
+        
     fi
     fbar_check_section=$(echo "$fbar_value" | grep '^\[')
     if [ "$fbar_check_section" != "" ];then
+        if [ ! -d "$fbar_temp_path" ];then
+            return 0
+        fi
         fbar_value=$(fbfr_section "$fbar_file" "$fbar_key" "[" "]")
         if [ "$fbar_value" == "" ];then
             return 0
@@ -166,6 +176,7 @@ function fbfu_parse {
             return 3
         fi
     fi
+    fbar_value=$(fbfu_convert_variable "$fbar_value")
     echo "$fbar_value"
     return 1
 }
