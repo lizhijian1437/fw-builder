@@ -1,0 +1,6 @@
+[submodule "init/json-c"]
+	path = init/json-c
+	url = https://github.com/json-c/json-c.git
+[submodule "init/libubox"]
+	path = init/libubox
+	url = https://git.openwrt.org/project/libubox.git
