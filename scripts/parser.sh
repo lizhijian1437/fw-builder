@@ -181,5 +181,57 @@ function fbfu_parse {
     return 1
 }
 
+#@brief 初始化json环境
+#@param json字符串
+function fbfu_json_init {
+    local fbar_json_string="$1"
+    json_load "$fbar_json_string"
+}
 
-
+#@brief json解析（使用前需先调用fbfu_json_init）
+#@param 需要解析的格式（例如XXX[A][B][C]）
+#@return 若解析成功会返回解析的字符串
+function fbfu_json_parse {
+    local fbar_m=0
+    local fbar_key_array=($(echo "$1" | sed -e 's/\[/ /g' | sed -e 's/\]/ /g'))
+    local fbar_key_size=${#fbar_key_array[@]}
+    local fbar_next_key=""
+    if [ "$fbar_key_size" == "0" ];then
+        return 1
+    fi
+    while [ "$fbar_m" -lt "$fbar_key_size" ];do
+        fbar_next_key="${fbar_key_array[$fbar_m]}"
+        json_get_type "__fbar_jtype" "$fbar_next_key"
+        if [ "$__fbar_jtype" == "" ];then
+            return 1
+        elif [ "$__fbar_jtype" != "array" ] && [ "$__fbar_jtype" != "object" ];then
+            break;
+        else
+            json_select "$fbar_next_key"
+            if [ "$?" == "1" ];then
+                return 1
+            fi
+        fi
+        fbar_m=$[ "$fbar_m" + 1 ]
+    done
+    fbar_m=$[ "$fbar_m" + 1 ]
+    if [ "$fbar_m" == "$fbar_key_size" ];then
+        json_get_var "__fbar_jvalue" "$fbar_next_key"
+        if [ "$__fbar_jtype" == "string" ];then
+            echo "$__fbar_jvalue"
+            return 2
+        elif [ "$__fbar_jtype" == "int" ];then
+            echo "$__fbar_jvalue"
+            return 3
+        elif [ "$__fbar_jtype" == "double" ];then
+            echo "$__fbar_jvalue"
+            return 4
+        elif [ "$__fbar_jtype" == "null" ];then
+            return 5
+        else
+            return 1
+        fi
+    else
+        return 1
+    fi
+}
