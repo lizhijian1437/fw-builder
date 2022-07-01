@@ -184,8 +184,7 @@ function fbfu_parse {
 #@brief 初始化json环境
 #@param json字符串
 function fbfu_json_init {
-    local fbar_json_string="$1"
-    json_load "$fbar_json_string"
+    json_load "$1"
 }
 
 function fbfr_json_select {
