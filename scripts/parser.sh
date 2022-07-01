@@ -5,7 +5,7 @@
 #fbau 公有参数
 #fbar 私有参数
 
-#depend: base.sh
+#depend: base.sh jshn.sh
 
 #@brief 按行遍历文件
 #@param 文件路径
