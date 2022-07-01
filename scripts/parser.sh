@@ -196,6 +196,8 @@ function fbfu_json_parse {
     local fbar_key_array=($(echo "$1" | sed -e 's/\[/ /g' | sed -e 's/\]/ /g'))
     local fbar_key_size=${#fbar_key_array[@]}
     local fbar_next_key=""
+	__fbar_jtype=""
+	__fbar_jvalue=""
     if [ "$fbar_key_size" == "0" ];then
         return 1
     fi
