@@ -16,7 +16,6 @@ else
 fi
 
 . ${FBAU_PF_SCRIPTS}/base.sh
-. ${FBAU_PF_SCRIPTS}/parser.sh
 
 #初始化pframe环境
 ${FBAU_PF_ROOT}/init/init.sh
@@ -25,3 +24,4 @@ if [ "$?" != "0" ];then
 fi
 
 . ${FBAU_PF_SCRIPTS}/jshn.sh
+. ${FBAU_PF_SCRIPTS}/parser.sh
