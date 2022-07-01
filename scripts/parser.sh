@@ -188,16 +188,12 @@ function fbfu_json_init {
     json_load "$fbar_json_string"
 }
 
-#@brief json解析（使用前需先调用fbfu_json_init）
-#@param 需要解析的格式（例如XXX[A][B][C]）
-#@return 若解析成功会返回解析的字符串
-function fbfu_json_parse {
+function fbfr_json_select {
     local fbar_m=0
     local fbar_key_array=($(echo "$1" | sed -e 's/\[/ /g' | sed -e 's/\]/ /g'))
     local fbar_key_size=${#fbar_key_array[@]}
     local fbar_next_key=""
-	__fbar_jtype=""
-	__fbar_jvalue=""
+    __fbar_jtype=""
     if [ "$fbar_key_size" == "0" ];then
         return 1
     fi
@@ -207,6 +203,7 @@ function fbfu_json_parse {
         if [ "$__fbar_jtype" == "" ];then
             return 1
         elif [ "$__fbar_jtype" != "array" ] && [ "$__fbar_jtype" != "object" ];then
+            fbar_m=$[ "$fbar_m" + 1 ]
             break;
         else
             json_select "$fbar_next_key"
@@ -216,24 +213,58 @@ function fbfu_json_parse {
         fi
         fbar_m=$[ "$fbar_m" + 1 ]
     done
-    fbar_m=$[ "$fbar_m" + 1 ]
     if [ "$fbar_m" == "$fbar_key_size" ];then
-        json_get_var "__fbar_jvalue" "$fbar_next_key"
-        if [ "$__fbar_jtype" == "string" ];then
-            echo "$__fbar_jvalue"
-            return 2
-        elif [ "$__fbar_jtype" == "int" ];then
-            echo "$__fbar_jvalue"
-            return 3
-        elif [ "$__fbar_jtype" == "double" ];then
-            echo "$__fbar_jvalue"
-            return 4
-        elif [ "$__fbar_jtype" == "null" ];then
-            return 5
-        else
-            return 1
-        fi
+        return 0
     else
         return 1
     fi
+} 
+
+#@brief json解析（使用前需先调用fbfu_json_init）
+#@param 需要解析的格式（例如XXX[A][B][C]）
+#@return 若解析成功会返回解析的字符串
+function fbfu_json_parse {
+    local result=""
+    local fbar_key_array=($(echo "$1" | sed -e 's/\[/ /g' | sed -e 's/\]/ /g'))
+    local fbar_key_size=${#fbar_key_array[@]}
+    local fbar_index=$[ "$fbar_key_size" - 1 ]
+    __fbar_jvalue=""
+    fbfr_json_select "$1"
+    if [ "$?" == "1" ];then
+        json_select
+        return 1
+    fi
+    local fbar_next_key="${fbar_key_array[$fbar_index]}"
+    json_get_var "__fbar_jvalue" "$fbar_next_key"
+    if [ "$__fbar_jtype" == "string" ];then
+        echo "$__fbar_jvalue"
+        result=2
+    elif [ "$__fbar_jtype" == "int" ];then
+        echo "$__fbar_jvalue"
+        result=3
+    elif [ "$__fbar_jtype" == "double" ];then
+        echo "$__fbar_jvalue"
+        result=4
+    elif [ "$__fbar_jtype" == "null" ];then
+        result=5
+    else
+        result=1
+    fi
+    json_select
+    return "$result"
+}
+
+#@brief json类型（使用前需先调用fbfu_json_init）
+#@param 需要解析的格式（例如XXX[A][B][C]）
+#@return 若解析成功会返回该节点的类型
+function fbfu_json_type {
+    local result=0
+    fbfr_json_select "$1"
+    if [ "$?" == "1" ];then
+        json_select
+        return 1;
+    fi
+    echo "$__fbar_jtype"
+    json_select
+    return "$result"
 }
