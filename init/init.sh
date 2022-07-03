@@ -27,8 +27,8 @@ if [ ! -f "${FBAU_PF_BIN}/jshn" ] || [ ! -f "${FBAU_PF_SCRIPTS}/jshn.sh" ];then
     cd ${FBAU_PF_INIT}/libubox
     cmake . -DCMAKE_INSTALL_PREFIX=${FBAU_PF_STAGING}
     make;make install
-    cp -f ${FBAU_PF_INIT}/libubox/jshn ${FBAU_PF_BIN}
-    cp -f ${FBAU_PF_INIT}/libubox/sh/jshn.sh ${FBAU_PF_SCRIPTS}
+    cp -f ${FBAU_PF_STAGING}/bin/jshn ${FBAU_PF_BIN}
+    cp -f ${FBAU_PF_STAGING}/share/libubox/jshn.sh ${FBAU_PF_SCRIPTS}
     chmod 755 ${FBAU_PF_SCRIPTS}/jshn.sh
 fi
 
