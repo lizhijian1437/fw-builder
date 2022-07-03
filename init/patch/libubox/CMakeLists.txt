@@ -4,8 +4,8 @@ INCLUDE(CheckFunctionExists)
 
 PROJECT(ubox C)
 
-SET(json $ENV{FBAU_PF_INIT}/json-c/libjson-c.so)
-SET(json-static $ENV{FBAU_PF_INIT}/json-c/libjson-c.a)
+SET(json $ENV{FBAU_PF_STAGING}/lib/libjson-c.so)
+SET(json-static $ENV{FBAU_PF_STAGING}/lib/libjson-c.a)
 
 ADD_DEFINITIONS(-Wall -Werror)
 IF(CMAKE_C_COMPILER_VERSION VERSION_GREATER 6)
@@ -21,7 +21,8 @@ INCLUDE(FindPkgConfig)
 PKG_SEARCH_MODULE(JSONC json-c)
 
 ADD_DEFINITIONS(-DJSONC)
-INCLUDE_DIRECTORIES($ENV{FBAU_PF_INIT}/json-c)
+INCLUDE_DIRECTORIES($ENV{FBAU_PF_STAGING}/include)
+INCLUDE_DIRECTORIES($ENV{FBAU_PF_STAGING}/include/json-c)
 
 SET(SOURCES avl.c avl-cmp.c blob.c blobmsg.c uloop.c usock.c ustream.c ustream-fd.c vlist.c utils.c safe_list.c runqueue.c md5.c kvlist.c ulog.c base64.c)
 

@@ -11,19 +11,22 @@
 . ${FBAU_PF_SCRIPTS}/parser.sh
 
 export FBAU_PF_INIT="${FBAU_PF_ROOT}/init"
-fbar_pf_patch="${FBAU_PF_ROOT}/init/patch"
+export FBAU_PF_STAGING="${FBAU_PF_INIT}/root"
+fbar_pf_patch="${FBAU_PF_INIT}/patch"
+
+mkdir -p ${FBAU_PF_STAGING}
 
 if [ ! -f "${FBAU_PF_BIN}/jshn" ] || [ ! -f "${FBAU_PF_SCRIPTS}/jshn.sh" ];then
     mkdir -p ${FBAU_PF_BIN}
     #json-c编译
     cd ${FBAU_PF_INIT}/json-c
-    cmake .
-    make
+    cmake . -DCMAKE_INSTALL_PREFIX=${FBAU_PF_STAGING}
+    make;make install
     #libubox编译
     cp -f ${fbar_pf_patch}/libubox/* ${FBAU_PF_INIT}/libubox
     cd ${FBAU_PF_INIT}/libubox
-    cmake .
-    make
+    cmake . -DCMAKE_INSTALL_PREFIX=${FBAU_PF_STAGING}
+    make;make install
     cp -f ${FBAU_PF_INIT}/libubox/jshn ${FBAU_PF_BIN}
     cp -f ${FBAU_PF_INIT}/libubox/sh/jshn.sh ${FBAU_PF_SCRIPTS}
     chmod 755 ${FBAU_PF_SCRIPTS}/jshn.sh
