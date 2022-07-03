@@ -22,6 +22,7 @@ fi
 #初始化pframe环境
 ${FBAU_PF_ROOT}/init/init.sh
 if [ "$?" != "0" ];then
+    fbfu_error "$0: environment init failed"
     exit 1
 fi
 
@@ -39,6 +40,7 @@ do
             export FBAU_CUSTOM_CONFIG=$(fbfu_convert_relative_path "$fbar_work" "$OPTARG")
             ;;
         p)
+            export FBFU_EXEC_PLUGIN_NAME=$OPTARG
             fbar_plugin_exec="${fbar_plugin_path}/$OPTARG/exec.sh"
             ;;
         t)
@@ -52,10 +54,12 @@ do
 done
 
 if [ ! -f "$FBAU_CUSTOM_CONFIG" ];then
+    fbfu_error "$0: custom config not found"
     exit 1
 fi
 
 if [ ! -f "$fbar_plugin_exec" ];then
+    fbfu_error "$0: plugin not found"
     exit 1
 fi
 
