@@ -184,12 +184,19 @@ function fbfu_parse {
 #@brief 初始化json环境
 #@param json字符串
 function fbfu_json_init {
-    json_load "$1"
+    local fbar_error=$(json_load "$1" 2>&1)
+    __fbar_jtype=""
+    __fbar_jvalue=""
+    if [ "$fbar_error" == "Failed to parse message data" ];then
+        json_load "{}"
+        return 1
+    fi
+    return 0
 }
 
 function fbfr_json_select {
     local fbar_m=0
-    local fbar_key_array=($(echo "$1" | sed -e 's/\[/ /g' | sed -e 's/\]/ /g'))
+    local fbar_key_array=($1)
     local fbar_key_size=${#fbar_key_array[@]}
     local fbar_next_key=""
     __fbar_jtype=""
@@ -224,17 +231,15 @@ function fbfr_json_select {
 #@return 若解析成功会返回解析的字符串
 function fbfu_json_parse {
     local result=""
-    local fbar_key_array=($(echo "$1" | sed -e 's/\[/ /g' | sed -e 's/\]/ /g'))
-    local fbar_key_size=${#fbar_key_array[@]}
-    local fbar_index=$[ "$fbar_key_size" - 1 ]
-    __fbar_jvalue=""
-    fbfr_json_select "$1"
+    local fbar_value=$(echo "$1" | sed -e 's/\[/ /g' | sed -e 's/\]/ /g')
+    local fbar_key="${fbar_value##* }"
+    fbfr_json_select "$fbar_value"
     if [ "$?" == "1" ];then
         json_select
         return 1
     fi
-    local fbar_next_key="${fbar_key_array[$fbar_index]}"
-    json_get_var "__fbar_jvalue" "$fbar_next_key"
+    __fbar_jvalue=""
+    json_get_var "__fbar_jvalue" "$fbar_key"
     if [ "$__fbar_jtype" == "string" ];then
         echo "$__fbar_jvalue"
         result=2
@@ -249,21 +254,6 @@ function fbfu_json_parse {
     else
         result=1
     fi
-    json_select
-    return "$result"
-}
-
-#@brief json类型（使用前需先调用fbfu_json_init）
-#@param 需要解析的格式（例如XXX[A][B][C]）
-#@return 若解析成功会返回该节点的类型
-function fbfu_json_type {
-    local result=0
-    fbfr_json_select "$1"
-    if [ "$?" == "1" ];then
-        json_select
-        return 1;
-    fi
-    echo "$__fbar_jtype"
     json_select
     return "$result"
 }
