@@ -34,6 +34,7 @@ function fbfu_convert_relative_path {
     while [ "$fbar_m" -lt "$fbar_relative_len" ];do
         fbar_next_relative=${fbar_relative_array[$fbar_m]}
         if [ "$fbar_next_relative" == "." ];then
+            fbar_m=$[ $fbar_m + 1 ]
             continue
         elif [ "$fbar_next_relative" == ".." ];then
             if [ "$fbar_next_absolute" == "0" ];then
