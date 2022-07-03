@@ -4,3 +4,6 @@
 [submodule "init/libubox"]
 	path = init/libubox
 	url = https://git.openwrt.org/project/libubox.git
+[submodule "init/opkg"]
+	path = init/opkg
+	url = https://git.openwrt.org/project/opkg-lede.git

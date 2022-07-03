@@ -32,6 +32,15 @@ if [ ! -f "${FBAU_PF_BIN}/jshn" ] || [ ! -f "${FBAU_PF_SCRIPTS}/jshn.sh" ];then
     chmod 755 ${FBAU_PF_SCRIPTS}/jshn.sh
 fi
 
+if [ ! -f "${FBAU_PF_BIN}/opkg" ];then
+    #opkg编译
+    cp -rf ${fbar_pf_patch}/opkg/* ${FBAU_PF_INIT}/opkg
+    cd ${FBAU_PF_INIT}/opkg
+    cmake . -DCMAKE_INSTALL_PREFIX=${FBAU_PF_STAGING}
+    make;make install
+    cp -f ${FBAU_PF_STAGING}/bin/opkg-cl ${FBAU_PF_BIN}/opkg
+fi
+
 
 
 
