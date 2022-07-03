@@ -54,12 +54,12 @@ do
 done
 
 if [ ! -f "$FBAU_CUSTOM_CONFIG" ];then
-    fbfu_error "$0: custom config not found"
+    fbfu_error "$0: custom config [${FBAU_CUSTOM_CONFIG}] not found"
     exit 1
 fi
 
 if [ ! -f "$fbar_plugin_exec" ];then
-    fbfu_error "$0: plugin not found"
+    fbfu_error "$0: plugin [${FBFU_EXEC_PLUGIN_NAME}] not found"
     exit 1
 fi
 
