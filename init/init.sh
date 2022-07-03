@@ -11,7 +11,7 @@
 . ${FBAU_PF_SCRIPTS}/parser.sh
 
 export FBAU_PF_INIT="${FBAU_PF_ROOT}/init"
-export FBAU_PF_STAGING="${FBAU_PF_INIT}/root"
+export FBAU_PF_STAGING="${FBAU_PF_INIT}/staging"
 fbar_pf_patch="${FBAU_PF_INIT}/patch"
 
 mkdir -p ${FBAU_PF_STAGING}
