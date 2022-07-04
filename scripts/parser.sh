@@ -134,26 +134,36 @@ function fbfr_parse_hook {
 function fbfu_parse {
     local fbar_file=$1
     local fbar_key=$2
+    local fbar_result=""
     local fbar_temp_path=$3
     local fbar_check_section=""
     local fbar_variable=""
     local fbar_command=""
     if [ ! -f "$fbar_file" ] || [ "$fbar_key" == "" ];then
-        return 0;
+        return 1
     fi
     local fbar_alias=$(fbfr_parse_kv "$fbar_file" "$fbar_key" " -> ")
     if [ "$fbar_alias" != "" ];then
         fbar_key="$fbar_alias"
     fi
+    local fbar_next=$(fbfr_parse_kv "$fbar_file" "__NEXT_CONFIG" " := ")
+    if [  -f "$fbar_next" ];then
+        fbar_value=$(fbfu_parse "$fbar_next" "$fbar_key" "$fbar_temp_path")
+        fbar_result="$?"
+        if [ "$fbar_result" != "1" ];then
+            echo "$fbar_value"
+            return "$fbar_result"
+        fi
+    fi
     local fbar_value=$(fbfr_parse_kv "$fbar_file" "$fbar_key" " := ")
     if [ "$fbar_value" == "" ];then
-        return 0
+        return 1
     fi
     fbar_check_section=$(echo "$fbar_value" | grep '^{')
     if [ "$fbar_check_section" != "" ];then
         fbar_value=$(fbfr_section "$fbar_file" "$fbar_key" "{" "}")
         if [ "$fbar_value" == "" ];then
-            return 0
+            return 1
         fi
         fbar_value=$(echo "$fbar_value" | tr -s "\r\n" " ")
         fbar_variable=$(fbfu_check_variable "$fbar_value")
@@ -162,27 +172,27 @@ function fbfu_parse {
             fbar_value=$(fbfu_convert_variable "$fbar_value")
         fi
         echo "$fbar_value"
-        return 2
+        return 3
         
     fi
     fbar_check_section=$(echo "$fbar_value" | grep '^\[')
     if [ "$fbar_check_section" != "" ];then
         if [ ! -d "$fbar_temp_path" ];then
-            return 0
+            return 1
         fi
         fbar_value=$(fbfr_section "$fbar_file" "$fbar_key" "[" "]")
         if [ "$fbar_value" == "" ];then
-            return 0
+            return 1
         else
             fbar_command=$(echo "$fbar_value" | sed -e '1s/^\[//' | sed -e '$s/]$//')
             fbar_value=$(fbfr_parse_hook "$fbar_command" "$fbar_temp_path")
             echo "$fbar_value"
-            return 3
+            return 4
         fi
     fi
     fbar_value=$(fbfu_convert_variable "$fbar_value")
     echo "$fbar_value"
-    return 1
+    return 2
 }
 
 #@brief 初始化json环境
