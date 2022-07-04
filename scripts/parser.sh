@@ -57,13 +57,13 @@ function fbfr_section {
             continue
         fi
         if [ "$fbar_stage" == "0" ];then
-            local fbar_check_key=$(echo "$fbar_line" | grep "^${fbar_key}[[:space:]]*=")
+            local fbar_check_key=$(echo "$fbar_line" | grep "^${fbar_key} := ")
             if [ "$fbar_check_key" == "" ];then
                 fbar_i=$[ $fbar_i + 1 ]
                 continue
             fi
             fbar_stage=1
-            fbar_value=$(echo "$fbar_line" | sed -e "s/^${fbar_key}[[:space:]]*=[[:space:]]*\(.*\)/\1/")
+            fbar_value=$(echo "$fbar_line" | sed -e "s/^${fbar_key} := [[:space:]]*\(.*\)/\1/")
             fbar_check_key=$(echo "$fbar_value" | grep "^\\${fbar_section_left}")
             if [ "$fbar_check_key" == "" ];then
                 return 1
@@ -94,7 +94,7 @@ function fbfr_section {
     if [ "$fbar_section_begin" == "0" ] || [ "$fbar_section_end" == "0" ] || [ "$fbar_sl_sum" != "$fbar_sr_sum" ];then
         return 1
     fi
-    sed -n "${fbar_section_begin},${fbar_section_end}p" "$fbar_file" | sed -e "s/^${fbar_key}[[:space:]]*=[[:space:]]*//"
+    sed -n "${fbar_section_begin},${fbar_section_end}p" "$fbar_file" | sed -e "s/^${fbar_key} := [[:space:]]*//"
     return 0
 }
 
@@ -102,11 +102,11 @@ function fbfr_parse_kv {
     local fbar_file=$1
     local fbar_key=$2
     local fbar_symbol=$3
-    local fbar_line=$(cat $fbar_file | grep "^$fbar_key")
+    local fbar_line=$(cat $fbar_file | grep "^${fbar_key}${fbar_symbol}")
     if [ "$fbar_line" == "" ];then
         return 1
     fi
-    local fbar_value=$(echo "$fbar_line" | sed -e "s/^${fbar_key}[[:space:]]*${fbar_symbol}[[:space:]]*//" | sed -n '1p')
+    local fbar_value=$(echo "$fbar_line" | sed -e "s/^${fbar_key}${fbar_symbol}[[:space:]]*//" | sed -n '1p')
     if [ "$fbar_value" == "$fbar_line" ];then
         return 1
     fi
@@ -141,7 +141,11 @@ function fbfu_parse {
     if [ ! -f "$fbar_file" ] || [ "$fbar_key" == "" ];then
         return 0;
     fi
-    local fbar_value=$(fbfr_parse_kv "$fbar_file" "$fbar_key" "=")
+    local fbar_alias=$(fbfr_parse_kv "$fbar_file" "$fbar_key" " -> ")
+    if [ "$fbar_alias" != "" ];then
+        fbar_key="$fbar_alias"
+    fi
+    local fbar_value=$(fbfr_parse_kv "$fbar_file" "$fbar_key" " := ")
     if [ "$fbar_value" == "" ];then
         return 0
     fi

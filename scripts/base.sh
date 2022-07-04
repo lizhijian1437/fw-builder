@@ -115,7 +115,7 @@ function fbfu_warn {
 
 #@brief 打印异常
 #@param 需要打印的消息
-function fbfu_error(){
+function fbfu_error {
     local content="[ERROR] $(date '+%Y-%m-%d %H:%M:%S') $@"
     echo -e "\033[31m${content}\033[0m"
 }
