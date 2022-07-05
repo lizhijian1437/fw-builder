@@ -98,7 +98,7 @@ function fbfr_section {
     return 0
 }
 
-function fbfr_parse_kv {
+function fbfu_parse_kv {
     local fbar_file=$1
     local fbar_key=$2
     local fbar_symbol=$3
@@ -115,97 +115,12 @@ function fbfr_parse_kv {
     return 0
 }
 
-function fbfr_parse_hook {
-    local fbar_command=$1
-    local fbar_temp_path=$2
-    if [ -f "${fbar_temp_path}/__hook_sh" ];then
-        rm -f ${fbar_temp_path}/__hook_sh
-    fi
-    mkdir -p ${fbar_temp_path}
-    echo "$fbar_command" > ${fbar_temp_path}/__hook_sh
-    chmod 755 ${fbar_temp_path}/__hook_sh
-    ${fbar_temp_path}/__hook_sh
-}
-
-#@brief fb配置解析接口
-#@param 文件路径
-#@param 需要解析的key值
-#@return 若解析成功，返回解析的字符串
-function fbfu_parse {
-    local fbar_file=$1
-    local fbar_key=$2
-    local fbar_result=""
-    local fbar_temp_path=$3
-    local fbar_check_section=""
-    local fbar_variable=""
-    local fbar_command=""
-    if [ ! -f "$fbar_file" ] || [ "$fbar_key" == "" ];then
-        return 1
-    fi
-    local fbar_alias=$(fbfr_parse_kv "$fbar_file" "$fbar_key" " -> ")
-    if [ "$fbar_alias" != "" ];then
-        fbar_key="$fbar_alias"
-    fi
-    local fbar_next=$(fbfr_parse_kv "$fbar_file" "__NEXT_CONFIG" " := ")
-    if [  -f "$fbar_next" ];then
-        fbar_value=$(fbfu_parse "$fbar_next" "$fbar_key" "$fbar_temp_path")
-        fbar_result="$?"
-        if [ "$fbar_result" != "1" ];then
-            echo "$fbar_value"
-            return "$fbar_result"
-        fi
-    fi
-    local fbar_value=$(fbfr_parse_kv "$fbar_file" "$fbar_key" " := ")
-    if [ "$fbar_value" == "" ];then
-        return 1
-    fi
-    fbar_check_section=$(echo "$fbar_value" | grep '^{')
-    if [ "$fbar_check_section" != "" ];then
-        fbar_value=$(fbfr_section "$fbar_file" "$fbar_key" "{" "}")
-        if [ "$fbar_value" == "" ];then
-            return 1
-        fi
-        fbar_value=$(echo "$fbar_value" | tr -s "\r\n" " ")
-        fbar_variable=$(fbfu_check_variable "$fbar_value")
-        if [ "$fbar_variable" == "true" ];then
-            fbar_value=$(echo "$fbar_value" | sed -e "s/\"/\\\\\"/g")
-            fbar_value=$(fbfu_convert_variable "$fbar_value")
-        fi
-        echo "$fbar_value"
-        return 3
-        
-    fi
-    fbar_check_section=$(echo "$fbar_value" | grep '^\[')
-    if [ "$fbar_check_section" != "" ];then
-        if [ ! -d "$fbar_temp_path" ];then
-            return 1
-        fi
-        fbar_value=$(fbfr_section "$fbar_file" "$fbar_key" "[" "]")
-        if [ "$fbar_value" == "" ];then
-            return 1
-        else
-            fbar_command=$(echo "$fbar_value" | sed -e '1s/^\[//' | sed -e '$s/]$//')
-            fbar_value=$(fbfr_parse_hook "$fbar_command" "$fbar_temp_path")
-            echo "$fbar_value"
-            return 4
-        fi
-    fi
-    fbar_value=$(fbfu_convert_variable "$fbar_value")
-    echo "$fbar_value"
-    return 2
-}
-
 #@brief 初始化json环境
 #@param json字符串
 function fbfu_json_init {
-    local fbar_error=$(json_load "$1" 2>&1)
+    json_load "$1" 1>/dev/null 2>&1
     __fbar_jtype=""
     __fbar_jvalue=""
-    if [ "$fbar_error" == "Failed to parse message data" ];then
-        json_load "{}"
-        return 1
-    fi
-    return 0
 }
 
 function fbfr_json_select {
@@ -246,7 +161,9 @@ function fbfr_json_select {
 function fbfu_json_parse {
     local result=""
     local fbar_value=$(echo "$1" | sed -e 's/\[/ /g' | sed -e 's/\]/ /g')
-    local fbar_key="${fbar_value##* }"
+    local fbar_key_array=($fbar_value)
+    local fbar_index=$[ "${#fbar_key_array[@]}" - 1 ]
+    local fbar_key=${fbar_key_array[$fbar_index]}
     fbfr_json_select "$fbar_value"
     if [ "$?" == "1" ];then
         json_select
@@ -271,3 +188,101 @@ function fbfu_json_parse {
     json_select
     return "$result"
 }
+
+function fbfr_parse_hook {
+    local fbar_command=$1
+    local fbar_temp_path=$2
+    if [ -f "${fbar_temp_path}/__hook_sh" ];then
+        rm -f ${fbar_temp_path}/__hook_sh
+    fi
+    mkdir -p ${fbar_temp_path}
+    echo "$fbar_command" > ${fbar_temp_path}/__hook_sh
+    chmod 755 ${fbar_temp_path}/__hook_sh
+    ${fbar_temp_path}/__hook_sh
+}
+
+#@brief fb配置解析接口
+#@param 文件路径
+#@param 需要解析的key值
+#@return 若解析成功，返回解析的字符串
+function fbfu_parse {
+    local fbar_file=$1
+    local fbar_key_check=""
+    local fbar_key=$2
+    local fbar_skey=""
+    local fbar_result=""
+    local fbar_temp_path=$3
+    local fbar_check_section=""
+    local fbar_variable=""
+    local fbar_command=""
+    fbar_key_check=$(echo "$2" | grep ':')
+    if [ "$fbar_key_check" != "" ];then
+        fbar_key=$(echo "$2" | sed -e 's/\(.*\):.*/\1/')
+        fbar_skey=$(echo "$2" | sed -e 's/.*:\(.*\)/\1/')
+    fi
+    if [ ! -f "$fbar_file" ] || [ "$fbar_key" == "" ];then
+        return 1
+    fi
+    local fbar_alias=$(fbfu_parse_kv "$fbar_file" "$fbar_key" " -> ")
+    if [ "$fbar_alias" != "" ];then
+        fbar_key="$fbar_alias"
+    fi
+    local fbar_next=$(fbfu_parse_kv "$fbar_file" "__NEXT_CONFIG" " := ")
+    if [  -f "$fbar_next" ];then
+        local fbar_nkey=$fbar_key
+        if [ "$fbar_skey" != "" ];then
+            fbar_nkey=${fbar_key}:${fbar_skey}
+        fi
+        fbar_value=$(fbfu_parse "$fbar_next" "$fbar_nkey" "$fbar_temp_path")
+        fbar_result="$?"
+        if [ "$fbar_result" != "1" ];then
+            echo "$fbar_value"
+            return "$fbar_result"
+        fi
+    fi
+    local fbar_value=$(fbfu_parse_kv "$fbar_file" "$fbar_key" " := ")
+    if [ "$fbar_value" == "" ];then
+        return 1
+    fi
+    fbar_check_section=$(echo "$fbar_value" | grep '^{')
+    if [ "$fbar_check_section" != "" ];then
+        fbar_value=$(fbfr_section "$fbar_file" "$fbar_key" "{" "}")
+        if [ "$fbar_value" == "" ];then
+            return 1
+        fi
+        fbar_value=$(echo "$fbar_value" | tr -s "\r\n" " ")
+        fbar_variable=$(fbfu_check_variable "$fbar_value")
+        if [ "$fbar_variable" == "true" ];then
+            fbar_value=$(echo "$fbar_value" | sed -e "s/\"/\\\\\"/g")
+            fbar_value=$(fbfu_convert_variable "$fbar_value")
+        fi
+        if [ "$fbar_skey" != "" ];then
+            fbfu_json_init "$fbar_value"
+            fbar_value=$(fbfu_json_parse "$fbar_skey")
+            echo "$fbar_value"
+            fbar_result="$?"
+            return "$fbar_result"
+        fi
+        return 3
+        
+    fi
+    fbar_check_section=$(echo "$fbar_value" | grep '^\[')
+    if [ "$fbar_check_section" != "" ];then
+        if [ ! -d "$fbar_temp_path" ];then
+            return 1
+        fi
+        fbar_value=$(fbfr_section "$fbar_file" "$fbar_key" "[" "]")
+        if [ "$fbar_value" == "" ];then
+            return 1
+        else
+            fbar_command=$(echo "$fbar_value" | sed -e '1s/^\[//' | sed -e '$s/]$//')
+            fbar_value=$(fbfr_parse_hook "$fbar_command" "$fbar_temp_path")
+            echo "$fbar_value"
+            return 4
+        fi
+    fi
+    fbar_value=$(fbfu_convert_variable "$fbar_value")
+    echo "$fbar_value"
+    return 2
+}
+
