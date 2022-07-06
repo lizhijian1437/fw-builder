@@ -94,7 +94,7 @@ function fbfu_convert_variable {
         echo "$1"
         return 0
     else
-        eval echo "$1"
+        eval echo \"$1\"
         return 1
     fi    
 }
