@@ -31,7 +31,7 @@ fbar_work=$(pwd)
 . ${FBAU_PF_SCRIPTS}/jshn.sh
 . ${FBAU_PF_SCRIPTS}/parser.sh
 
-usage="Usage: $0 [ -f custom config ] [ -p plugin ] [ -t temp directory ]"
+fbar_usage="Usage: $0 [ -f custom config ] [ -p plugin ] [ -t temp directory ]"
 
 while getopts :f:p:t: opt
 do
@@ -47,7 +47,7 @@ do
             export FBAU_TEMP_DIR=$(fbfu_convert_relative_path "$fbar_work" "$OPTARG")
             ;;
         *) 
-            echo "$usage"
+            echo "$fbar_usage"
             exit 1
             ;;
     esac
