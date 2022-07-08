@@ -161,7 +161,7 @@ function fbfu_parse {
         if [ "$fbar_value" == "" ];then
             return 1
         fi
-        fbar_value=$(fbfu_convert_variable "$fbar_value"| tr -s "\r\n" " ")
+        fbar_value=$(fbfu_convert_variable "$fbar_value")
         echo "$fbar_value"
         return 3
         
