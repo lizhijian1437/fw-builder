@@ -126,6 +126,7 @@ function fbfr_parse_hook {
 #@brief fb配置解析接口
 #@param 文件路径
 #@param 需要解析的key值
+#@param 临时文件目录
 #@return 若解析成功，返回解析的字符串
 function fbfu_parse {
     local fbar_file=$1
