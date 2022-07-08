@@ -119,3 +119,48 @@ function fbfu_error {
     local content="[ERROR] $(date '+%Y-%m-%d %H:%M:%S') $@"
     echo -e "\033[31m${content}\033[0m"
 }
+
+
+#@brief 初始化扩展列表,格式"VALUE1|VALUE2|VALUE3"
+#@param 参数字符串
+#@return 返回扩展列表，以及列表中值的数量
+function expand_list_init {
+    local fbar_expand_list=$(echo "$1" | awk 'BEGIN{RS="|";} { print $0 }')
+    local fbar_expand_list_sum=$(echo "$fbar_expand_list" | sed -n '$=')
+    echo "$fbar_expand_list"
+    return "$fbar_expand_list_sum"
+}
+
+#@brief 从扩展列表中取出值
+#@param 扩展列表
+#@param 需要取出值的序号
+#@return 返回扩展列表
+function expand_list_get {
+    echo "$1" | sed -n "$2p"
+}
+
+#@brief 遍历扩展列表
+#@param 扩展列表
+#@param 起始序号
+#@param 结束序号
+#@param 回调函数($1:值 $2:序号 $3:私有参数)
+#@param 私有参数
+#@return 若回调函数返回非0值，则会停止遍历，并且返回该值，否则会返回0
+function expand_list_foreach {
+    local fbar_expand_list=$1
+    local fbar_begin=$2
+    local fbar_end=$3
+    local fbar_hook=$4
+    local fbar_args=$5
+    local fbar_result=0
+    while [ "$fbar_begin" -le "$fbar_end" ];do
+        local fbar_next=$(expand_list_get "$fbar_expand_list" "$fbar_begin")
+        eval "${fbar_hook} \"${fbar_next}\" \"${fbar_begin}\" \"${fbar_args}\""
+        fbar_result="$?"
+        if [ "$fbar_result" != "0" ];then
+            return "$fbar_result"
+        fi
+        fbar_begin=$[ "$fbar_begin" + 1 ]
+    done
+    return 0
+}
