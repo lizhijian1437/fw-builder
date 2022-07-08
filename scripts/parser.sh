@@ -108,7 +108,7 @@ function fbfu_parse_kv {
     fi
     local fbar_value=$(echo "$fbar_line" | sed -e "s/^${fbar_key}[[:space:]]*${fbar_symbol}[[:space:]]*//")
     fbar_value=$(fbfu_string_slim "$fbar_value")
-	echo "$fbar_value"
+    echo "$fbar_value"
     return 0
 }
 
