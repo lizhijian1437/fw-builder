@@ -155,7 +155,7 @@ function expand_list_foreach {
     local fbar_result=0
     while [ "$fbar_begin" -le "$fbar_end" ];do
         local fbar_next=$(expand_list_get "$fbar_expand_list" "$fbar_begin")
-        eval "${fbar_hook} \"${fbar_next}\" \"${fbar_begin}\" \"${fbar_args}\""
+        eval ${fbar_hook} \"${fbar_next}\" \"${fbar_begin}\" \"${fbar_args}\"
         fbar_result="$?"
         if [ "$fbar_result" != "0" ];then
             return "$fbar_result"
@@ -164,3 +164,151 @@ function expand_list_foreach {
     done
     return 0
 }
+
+#@brief 缓存链表初始化
+#@param 全局数组(缓存链表的对象)
+#@param 全局变量(缓存链表的大小)
+#@param 全局变量(缓存链表的最后一个空节点)
+function fbfu_cache_list_init {
+    local fbar_list=$1
+    local fbar_sum=$2
+    local fbar_end=$3
+    eval ${fbar_list}\[0\]=0
+    eval ${fbar_sum}=1
+    eval ${fbar_end}=0
+}
+
+#@brief 缓存链表获取一个索引
+#@param 全局数组(缓存链表的对象)
+#@param 全局变量(缓存链表的大小)
+#@param 全局变量(缓存链表的最后一个空节点)
+#@param 全局变量(返回下一个可用索引)
+function fbfu_cache_list_next {
+    local fbar_list=$1
+    local fbar_sum=$2
+    local fbar_end=$3
+    local fbar_next=$4
+    eval local fbar_end_index=\$\{${fbar_end}\}
+    eval local fbar_end_val=\"\$\{${fbar_list}\[${fbar_end_index}\]\}\"
+    if [ "$fbar_end_index" != "0" ];then
+        eval ${fbar_end}=${fbar_end_val}
+        eval ${fbar_next}=${fbar_end_index}
+        return 
+    fi
+    eval local fbar_next_index=\$\{${fbar_sum}\}
+    eval ${fbar_sum}=\$\[ ${fbar_next_index} \+ 1 \]
+    eval ${fbar_next}=${fbar_next_index}
+}
+
+#@brief 缓存链表删除一个索引
+#@param 全局数组(缓存链表的对象)
+#@param 全局变量(缓存链表的大小)
+#@param 全局变量(缓存链表的最后一个空节点)
+#@param 缓存链表需要删除的索引
+function fbfu_cache_list_del {
+    local fbar_list=$1
+    local fbar_sum=$2
+    local fbar_end=$3
+    local fbar_del_index=$4
+    eval local fbar_end_index=\$\{${fbar_end}\}
+    eval ${fbar_list}\[${fbar_del_index}\]=${fbar_end_index}
+    eval ${fbar_end}=${fbar_del_index}
+}
+
+#@brief 键值链表初始化
+#@param 全局数组(缓存链表的对象)
+#@param 全局变量(缓存链表的大小)
+#@param 全局变量(缓存链表的最后一个空节点)
+function fbfu_kvlist_init {
+    fbfu_cache_list_init "$1" "$2" "$3"
+}
+
+#@brief 遍历键值链表
+#@param 全局数组(缓存链表的对象)
+#@param 全局变量(缓存链表的大小)
+#@param 全局变量(缓存链表的最后一个空节点)
+#@param 回调函数($1:键 $2:值 $3:索引 $4:私有参数)
+#@param 私有参数
+function fbfu_kvlist_foreach {
+    local fbar_m=1
+    local fbar_list=$1
+    local fbar_sum=$2
+    local fbar_end=$3
+    local fbar_hook=$4
+    local fbar_args=$5
+    local fbar_result=$6
+    eval local fbar_sum_value=\$\{${fbar_sum}\}
+    while [ "$fbar_m" -lt "$fbar_sum_value" ];do
+        eval local fbar_next=\$\{${fbar_list}\[${fbar_m}\]\}
+        local fbar_key=$(echo "$fbar_next" | sed -e 's/|.*$//')
+        if [ "$fbar_key" == "$fbar_next" ];then
+            fbar_m=$[ "$fbar_m" + 1 ]
+            continue
+        fi
+        local fbar_value=$(echo "$fbar_next" | sed -e 's/^.*|//')
+        eval ${fbar_hook} \"${fbar_key}\" \"${fbar_value}\" \"${fbar_m}\" \"${fbar_args}\"
+        fbar_result="$?"
+        if [ "$fbar_result" != "0" ];then
+            return "$fbar_result"
+        fi
+        fbar_m=$[ "$fbar_m" + 1 ]
+    done
+    return 0
+}
+
+function __fbfr_kvlist_search_key {
+    if [ "$1" == "$4" ];then
+        return "$3"
+    fi
+    return 0
+}
+
+#@brief 键值链表设置键值对
+#@param 全局数组(缓存链表的对象)
+#@param 全局变量(缓存链表的大小)
+#@param 全局变量(缓存链表的最后一个空节点)
+#@param 需要设置的键
+#@param 需要设置的值
+function fbfu_kvlist_set {
+    local fbar_list=$1
+    local fbar_sum=$2
+    local fbar_end=$3
+    local fbar_key=$4
+    local fbar_value=$5
+    __fbar_kvlist_next=0
+    fbfu_kvlist_foreach "$fbar_list" "$fbar_sum" "$fbar_end" "__fbfr_kvlist_search_key" "$fbar_key"
+    __fbar_kvlist_next=$?
+    if [ "$__fbar_kvlist_next" != "0" ];then
+        if [ "$fbar_value" == "" ];then
+            fbfu_cache_list_del "$fbar_list" "$fbar_sum" "$fbar_end" "$__fbar_kvlist_next"
+            return
+        fi
+    else
+        if [ "$fbar_value" == "" ];then
+            return
+        fi
+        fbfu_cache_list_next "$fbar_list" "$fbar_sum" "$fbar_end" "__fbar_kvlist_next"
+    fi
+    eval ${fbar_list}\[${__fbar_kvlist_next}\]=\"${fbar_key}\|${fbar_value}\"
+}
+
+#@brief 获取键值链表中设置的值
+#@param 全局数组(缓存链表的对象)
+#@param 全局变量(缓存链表的大小)
+#@param 全局变量(缓存链表的最后一个空节点)
+#@param 需要获取的键
+function fbfu_kvlist_get {
+    local fbar_list=$1
+    local fbar_sum=$2
+    local fbar_end=$3
+    local fbar_key=$4
+    local fbar_value=$5
+    __fbar_kvlist_next=0
+    fbfu_kvlist_foreach "$fbar_list" "$fbar_sum" "$fbar_end" "__fbfr_kvlist_search_key" "$fbar_key"
+    __fbar_kvlist_next=$?
+    if [ "$__fbar_kvlist_next" != "0" ];then
+        eval local fbar_next=\$\{${fbar_list}\[${__fbar_kvlist_next}\]\}
+        echo "$fbar_next" | sed -e 's/^.*|//'
+    fi
+}
+
