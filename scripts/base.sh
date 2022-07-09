@@ -236,7 +236,7 @@ function fbfu_kvlist_foreach {
     local fbar_end=$3
     local fbar_hook=$4
     local fbar_args=$5
-    local fbar_result=$6
+    local fbar_result=""
     eval local fbar_sum_value=\$\{${fbar_sum}\}
     while [ "$fbar_m" -lt "$fbar_sum_value" ];do
         eval local fbar_next=\$\{${fbar_list}\[${fbar_m}\]\}
