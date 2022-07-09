@@ -302,7 +302,6 @@ function fbfu_kvlist_get {
     local fbar_sum=$2
     local fbar_end=$3
     local fbar_key=$4
-    local fbar_value=$5
     __fbar_kvlist_next=0
     fbfu_kvlist_foreach "$fbar_list" "$fbar_sum" "$fbar_end" "__fbfr_kvlist_search_key" "$fbar_key"
     __fbar_kvlist_next=$?
