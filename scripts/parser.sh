@@ -35,7 +35,13 @@ function fbfu_line_foreach {
     return 0
 }
 
-function fbfr_section {
+#@brief 解析段文件
+#@param 文件路径
+#@param 需要解析的key值
+#@param 段左符号
+#@param 段右符号
+#@return 若解析成功，返回解析的字符串
+function fbfu_section {
     local fbar_i=1
     local fbar_file=$1
     local fbar_key=$2
@@ -98,6 +104,10 @@ function fbfr_section {
     return 0
 }
 
+#@brief 解析键值对文件
+#@param 文件路径
+#@param 需要解析的key值
+#@return 若解析成功，返回解析的字符串
 function fbfu_parse_kv {
     local fbar_file=$1
     local fbar_key=$2
@@ -160,7 +170,7 @@ function fbfu_parse {
     fi
     fbar_check_section=$(echo "$fbar_value" | grep '^\[')
     if [ "$fbar_check_section" != "" ];then
-        fbar_value=$(fbfr_section "$fbar_file" "$fbar_key" "[" "]" | sed -e '1s/^\[//' | sed -e '$s/]$//')
+        fbar_value=$(fbfu_section "$fbar_file" "$fbar_key" "[" "]" | sed -e '1s/^\[//' | sed -e '$s/]$//')
         if [ "$fbar_value" == "" ];then
             return 1
         fi
@@ -174,7 +184,7 @@ function fbfu_parse {
         if [ ! -d "$fbar_temp_path" ];then
             return 1
         fi
-        fbar_value=$(fbfr_section "$fbar_file" "$fbar_key" "{" "}")
+        fbar_value=$(fbfu_section "$fbar_file" "$fbar_key" "{" "}")
         if [ "$fbar_value" == "" ];then
             return 1
         else
