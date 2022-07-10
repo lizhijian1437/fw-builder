@@ -21,6 +21,7 @@ export FBAU_PROJECT=$(pwd)
 fbar_node_suffix="fwb.n"
 fbar_build_dir="${FBAU_PROJECT}/build"
 fbar_temp_dir="${fbar_build_dir}/tmp"
+fbar_hook="${fbar_build_dir}/tmp/__hook_sh"
 fbar_main_node="${FBAU_PROJECT}/${fbar_node_suffix}"
 fbar_nodes_dir="${FBAU_PROJECT}/nodes"
 fbar_node_temp="${fbar_temp_dir}/node"
@@ -67,7 +68,6 @@ function fbfr_fbc_init {
 }
 
 fbfr_fbc_init
-. env.sh
 
 function fbfr_node_search {
     local fbar_check_key=$(echo "$1" | grep "^NPATH_")
@@ -84,8 +84,17 @@ function fbfr_node_search {
     fi
 }
 
+function fbfr_gen_hook {
+    echo "$1" > $fbar_hook
+    if [ "$?" != "0" ];then
+        exit 1
+    fi
+}
+
 function fbfr_handle_node {
     local fbar_m=0
+    local fbar_value=""
+    local fbar_result=0
     local fbar_next_node=$1
     local fbar_custom_path=${fbar_next_node%/*}
     local fbar_node_name=${fbar_custom_path##*/}
@@ -94,16 +103,29 @@ function fbfr_handle_node {
         return 0
     fi
     fbfu_info "NODE: ${fbar_node_name} start"
-    fbfu_parse "$fbar_next_node" "TRACE_ON" "$fbar_temp_dir"
-    local fbar_result=$?
+    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_ON" "$fbar_temp_dir")
+    if [ "$?" == "4" ];then
+        fbfr_gen_hook "$fbar_value"
+        $fbar_hook "START"
+        fbar_result="$?"
+    fi
     touch "${fbar_node_chain}/${fbar_node_name}"
 #错误码:11表示异常
     if [ "$fbar_result" == "11" ];then
+        fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir")
+        if [ "$?" == "4" ];then
+            fbfr_gen_hook "$fbar_value"
+            $fbar_hook "EXCEPTION"
+        fi
         return 1
     fi
     local fbar_node_depend=$(fbfu_parse "$fbar_next_node" "DEPEND" "$fbar_temp_dir")
     if [ "$fbar_node_depend" == "" ];then
-        fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir"
+        fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir")
+        if [ "$?" == "4" ];then
+            fbfr_gen_hook "$fbar_value"
+            $fbar_hook "STOP"
+        fi
         return 0
     fi
     local fbar_node_depend_array=($fbar_node_depend)
@@ -117,12 +139,21 @@ function fbfr_handle_node {
         else
             fbfr_handle_node "$fbar_next_depend_node"
             if [ "$?" == "1" ];then
+                fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir")
+                 if [ "$?" == "4" ];then
+                    fbfr_gen_hook "$fbar_value"
+                    $fbar_hook "FORCE"
+                fi
                 return 1
             fi
         fi
         fbar_m=$[ "$fbar_m" + 1 ]
     done
-    fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir"
+    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir")
+    if [ "$?" == "4" ];then
+        fbfr_gen_hook "$fbar_value"
+        $fbar_hook "STOP"
+    fi
     return 0
 }
 
