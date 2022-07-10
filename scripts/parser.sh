@@ -117,22 +117,8 @@ function fbfu_parse_kv {
         return 1
     fi
     local fbar_value=$(echo "$fbar_line" | sed -e "s/^${fbar_key}[[:space:]]*${fbar_symbol}[[:space:]]*//")
-    fbar_value=$(fbfu_string_slim "$fbar_value")
-    echo "$fbar_value"
+    fbfu_string_slim "$fbar_value"
     return 0
-}
-
-function fbfr_parse_hook {
-    local fbar_command=$1
-    local fbar_temp_path=$2
-    if [ -f "${fbar_temp_path}/__hook_sh" ];then
-        rm -f ${fbar_temp_path}/__hook_sh
-    fi
-    mkdir -p ${fbar_temp_path}
-    echo "$fbar_command" > ${fbar_temp_path}/__hook_sh
-    chmod 755 ${fbar_temp_path}/__hook_sh
-    ${fbar_temp_path}/__hook_sh
-    return "$?"
 }
 
 #@brief fb配置解析接口
@@ -140,7 +126,7 @@ function fbfr_parse_hook {
 #@param 需要解析的key值
 #@param 临时文件目录
 #@return 若解析成功，返回解析的字符串
-#@note 0表示成功，1表示解析失败，2表示字符串，3表示数组
+#@note 0表示成功，1表示解析失败，2表示字符串，3表示数组，4表示hook
 function fbfu_parse {
     local fbar_file=$1
     local fbar_key=$2
@@ -174,8 +160,7 @@ function fbfu_parse {
         if [ "$fbar_value" == "" ];then
             return 1
         fi
-        fbar_value=$(fbfu_convert_variable "$fbar_value")
-        echo "$fbar_value"
+        fbfu_convert_variable "$fbar_value"
         return 3
         
     fi
@@ -188,13 +173,11 @@ function fbfu_parse {
         if [ "$fbar_value" == "" ];then
             return 1
         else
-            fbar_command=$(echo "$fbar_value" | sed -e '1s/^{//' | sed -e '$s/}$//')
-            fbfr_parse_hook "$fbar_command" "$fbar_temp_path"
-            return $?
+            echo "$fbar_value" | sed -e '1s/^{//' | sed -e '$s/}$//'
+            return 4
         fi
     fi
-    fbar_value=$(fbfu_convert_variable "$fbar_value")
-    echo "$fbar_value"
+    fbfu_convert_variable "$fbar_value"
     return 2
 }
 
