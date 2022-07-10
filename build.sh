@@ -169,6 +169,7 @@ function fbfr_node_phase {
     fbfr_handle_node "$fbar_main_node"
 }
 
+#FRAME会在上下文中使用
 fbar_frame_hook=$(fbfu_parse "$fbar_main_node" "FRAME" "$fbar_temp_dir")
 if [ "$?" == "4" ];then
     fbfr_gen_hook "$fbar_frame_hook"
