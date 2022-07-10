@@ -21,12 +21,12 @@ if [ ! -f "${FBAU_PF_BIN}/jshn" ] || [ ! -f "${FBAU_PF_SCRIPTS}/jshn.sh" ];then
     #json-c编译
     cd ${FBAU_PF_INIT}/json-c
     cmake . -DCMAKE_INSTALL_PREFIX=${FBAU_PF_STAGING}
-    make;make install
+    make -j8;make install
     #libubox编译
     cp -f ${fbar_pf_patch}/libubox/* ${FBAU_PF_INIT}/libubox
     cd ${FBAU_PF_INIT}/libubox
     cmake . -DCMAKE_INSTALL_PREFIX=${FBAU_PF_STAGING}
-    make;make install
+    make -j8;make install
     cp -f ${FBAU_PF_STAGING}/bin/jshn ${FBAU_PF_BIN}
     cp -f ${FBAU_PF_STAGING}/share/libubox/jshn.sh ${FBAU_PF_SCRIPTS}
     chmod 755 ${FBAU_PF_SCRIPTS}/jshn.sh
@@ -37,7 +37,7 @@ if [ ! -f "${FBAU_PF_BIN}/opkg" ];then
     cp -rf ${fbar_pf_patch}/opkg/* ${FBAU_PF_INIT}/opkg
     cd ${FBAU_PF_INIT}/opkg
     cmake . -DCMAKE_INSTALL_PREFIX=${FBAU_PF_STAGING}
-    make;make install
+    make -j8;make install
     cp -f ${FBAU_PF_STAGING}/bin/opkg-cl ${FBAU_PF_BIN}/opkg
 fi
 
