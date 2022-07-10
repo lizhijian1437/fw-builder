@@ -169,4 +169,12 @@ function fbfr_node_phase {
     fbfr_handle_node "$fbar_main_node"
 }
 
+fbar_frame_hook=$(fbfu_parse "$fbar_main_node" "FRAME" "$fbar_temp_dir")
+if [ "$?" == "4" ];then
+    fbfr_gen_hook "$fbar_frame_hook"
+    . $fbar_hook
+fi
+
+on_begin 2>/dev/null
 fbfr_node_phase
+on_finish 2>/dev/null
