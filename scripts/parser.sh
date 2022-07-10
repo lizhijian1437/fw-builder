@@ -122,6 +122,7 @@ function fbfr_parse_hook {
     echo "$fbar_command" > ${fbar_temp_path}/__hook_sh
     chmod 755 ${fbar_temp_path}/__hook_sh
     ${fbar_temp_path}/__hook_sh
+    return "$?"
 }
 
 #@brief fb配置解析接口
@@ -129,6 +130,7 @@ function fbfr_parse_hook {
 #@param 需要解析的key值
 #@param 临时文件目录
 #@return 若解析成功，返回解析的字符串
+#@note 0表示成功，1表示解析失败，2表示字符串，3表示数组
 function fbfu_parse {
     local fbar_file=$1
     local fbar_key=$2
@@ -177,9 +179,8 @@ function fbfu_parse {
             return 1
         else
             fbar_command=$(echo "$fbar_value" | sed -e '1s/^{//' | sed -e '$s/}$//')
-            fbar_value=$(fbfr_parse_hook "$fbar_command" "$fbar_temp_path")
-            echo "$fbar_value"
-            return 4
+            fbfr_parse_hook "$fbar_command" "$fbar_temp_path"
+            return $?
         fi
     fi
     fbar_value=$(fbfu_convert_variable "$fbar_value")
