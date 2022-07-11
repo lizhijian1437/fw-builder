@@ -36,33 +36,6 @@ fbar_nodes_dir="${FBAU_PROJECT}/nodes"
 fbar_node_temp="${fbar_temp_dir}/node"
 fbar_node_chain="${fbar_node_temp}/chain"
 
-fbar_usage="Usage: $0 [ -i Initialize project ] [ -s Run a phase separately ] [ -c Clean ]"
-
-while getopts p:i opt
-do
-    case "$opt" in
-        p) 
-            fbar_phase_list=$(expand_list_init "$OPTARG")
-            fbar_phase_list_size=$?
-            fbar_phase=$(expand_list_get "$fbar_phase_list" "1")
-            ;;
-        i)
-            if [ ! -f "$fbar_main_node" ];then
-                touch $fbar_main_node
-                chmod 755 $fbar_main_node
-            fi
-            if [ ! -d "$fbar_nodes_dir" ];then
-                mkdir -p "$fbar_nodes_dir"
-            fi
-            exit 0
-            ;;
-        *)
-            echo "$fbar_usage"
-            exit 1
-            ;;
-    esac
-done
-
 if [  ! -f "${fbar_main_node}" ];then
     fbfu_error "please provide ${fbar_main_node}"
     exit 1
@@ -166,7 +139,7 @@ function fbfr_handle_node {
     return 0
 }
 
-function fbfr_node_phase {
+function fbfr_node_frame {
     if [ -d "$fbar_node_temp" ];then
         rm -rf "$fbar_node_temp"
         if [ "$?" != "0" ];then
@@ -178,4 +151,4 @@ function fbfr_node_phase {
     fbfr_handle_node "$fbar_main_node"
 }
 
-fbfr_node_phase
+fbfr_node_frame
