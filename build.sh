@@ -5,19 +5,28 @@
 #fbau 公有参数
 #fbar 私有参数
 
-export FBAU_ROOT=$(dirname $(readlink -f $0))
+fbar_root=$(dirname $(readlink -f $0))
+fbar_bin="${fbar_root}/bin"
+export FBAU_PROJECT=$(pwd)
+export FBAU_SCRIPTS="${fbar_root}/scripts"
 
-${FBAU_ROOT}/pframe.sh -i
+. ${fbar_root}/init/init.sh
+if [ "$?" != "0" ];then
+    fbfu_error "$0: environment init failed"
+    exit 1
+fi
 
-export FBAU_SCRIPTS="${FBAU_ROOT}/scripts"
-export FBAU_BIN="${FBAU_ROOT}/bin"
+if [ "$PATH" == "" ];then
+    export PATH="$fbar_bin"
+else
+    export PATH="${PATH}:${fbar_bin}"
+fi
 
 . ${FBAU_SCRIPTS}/base.sh
 . ${FBAU_SCRIPTS}/jshn.sh
 . ${FBAU_SCRIPTS}/parser.sh
 . ${FBAU_SCRIPTS}/fbc.sh
 
-export FBAU_PROJECT=$(pwd)
 fbar_node_suffix="fwb.n"
 fbar_build_dir="${FBAU_PROJECT}/build"
 fbar_temp_dir="${fbar_build_dir}/tmp"

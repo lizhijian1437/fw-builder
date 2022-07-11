@@ -7,17 +7,14 @@
 
 #请勿手动使用该脚本
 
-. ${FBAU_PF_SCRIPTS}/base.sh
-. ${FBAU_PF_SCRIPTS}/parser.sh
-
-export FBAU_PF_INIT="${FBAU_PF_ROOT}/init"
+export FBAU_PF_INIT="${fbar_root}/init"
 export FBAU_PF_STAGING="${FBAU_PF_INIT}/staging"
 fbar_pf_patch="${FBAU_PF_INIT}/patch"
 
 mkdir -p ${FBAU_PF_STAGING}
 
-if [ ! -f "${FBAU_PF_BIN}/jshn" ] || [ ! -f "${FBAU_PF_SCRIPTS}/jshn.sh" ];then
-    mkdir -p ${FBAU_PF_BIN}
+if [ ! -f "${fbar_bin}/jshn" ] || [ ! -f "${FBAU_SCRIPTS}/jshn.sh" ];then
+    mkdir -p ${fbar_bin}
     #json-c编译
     cd ${FBAU_PF_INIT}/json-c
     cmake . -DCMAKE_INSTALL_PREFIX=${FBAU_PF_STAGING}
@@ -27,19 +24,21 @@ if [ ! -f "${FBAU_PF_BIN}/jshn" ] || [ ! -f "${FBAU_PF_SCRIPTS}/jshn.sh" ];then
     cd ${FBAU_PF_INIT}/libubox
     cmake . -DCMAKE_INSTALL_PREFIX=${FBAU_PF_STAGING}
     make -j8;make install
-    cp -f ${FBAU_PF_STAGING}/bin/jshn ${FBAU_PF_BIN}
-    cp -f ${FBAU_PF_STAGING}/share/libubox/jshn.sh ${FBAU_PF_SCRIPTS}
-    chmod 755 ${FBAU_PF_SCRIPTS}/jshn.sh
+    cp -f ${FBAU_PF_STAGING}/bin/jshn ${fbar_bin}
+    cp -f ${FBAU_PF_STAGING}/share/libubox/jshn.sh ${FBAU_SCRIPTS}
+    chmod 755 ${FBAU_SCRIPTS}/jshn.sh
 fi
 
-if [ ! -f "${FBAU_PF_BIN}/opkg" ];then
+if [ ! -f "${fbar_bin}/opkg" ];then
     #opkg编译
     cp -rf ${fbar_pf_patch}/opkg/* ${FBAU_PF_INIT}/opkg
     cd ${FBAU_PF_INIT}/opkg
     cmake . -DCMAKE_INSTALL_PREFIX=${FBAU_PF_STAGING}
     make -j8;make install
-    cp -f ${FBAU_PF_STAGING}/bin/opkg-cl ${FBAU_PF_BIN}/opkg
+    cp -f ${FBAU_PF_STAGING}/bin/opkg-cl ${fbar_bin}/opkg
 fi
+
+cd ${FBAU_PROJECT}
 
 
 
