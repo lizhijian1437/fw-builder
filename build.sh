@@ -10,6 +10,8 @@ fbar_bin="${fbar_root}/bin"
 export FBAU_PROJECT=$(pwd)
 export FBAU_SCRIPTS="${fbar_root}/scripts"
 
+. ${FBAU_SCRIPTS}/base.sh
+
 . ${fbar_root}/init/init.sh
 if [ "$?" != "0" ];then
     fbfu_error "$0: environment init failed"
@@ -22,7 +24,6 @@ else
     export PATH="${PATH}:${fbar_bin}"
 fi
 
-. ${FBAU_SCRIPTS}/base.sh
 . ${FBAU_SCRIPTS}/jshn.sh
 . ${FBAU_SCRIPTS}/parser.sh
 . ${FBAU_SCRIPTS}/fbc.sh
