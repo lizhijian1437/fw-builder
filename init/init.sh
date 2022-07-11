@@ -13,6 +13,11 @@ fbar_pf_patch="${FBAU_PF_INIT}/patch"
 
 mkdir -p ${FBAU_PF_STAGING}
 
+#初始化所有submodule
+cd $fbar_root
+git submodule init
+git submodule update
+
 if [ ! -f "${fbar_bin}/jshn" ] || [ ! -f "${FBAU_SCRIPTS}/jshn.sh" ];then
     mkdir -p ${fbar_bin}
     #json-c编译
