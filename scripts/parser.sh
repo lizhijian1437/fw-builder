@@ -21,7 +21,7 @@ function fbfu_line_foreach {
     if [ ! -f "$fbar_file" ];then
         return 1
     fi
-    while read fbar_line;do
+    while read fbar_line || [ "$fbar_line" != "" ];do
         fbar_line=$(fbfu_string_slim "$fbar_line")
         if [ "$fbar_line" == "" ];then
             continue
@@ -56,7 +56,7 @@ function fbfu_section {
     local fbar_stage=0
     local fbar_section_begin=0
     local fbar_section_end=0
-    while read fbar_line;do
+    while read fbar_line || [ "$fbar_line" != "" ];do
         fbar_line=$(fbfu_string_slim "$fbar_line")
         if [ "$fbar_line" == "" ];then
             fbar_i=$[ $fbar_i + 1 ]
