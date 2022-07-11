@@ -17,6 +17,10 @@ mkdir -p ${FBAU_PF_STAGING}
 cd $fbar_root
 git submodule init
 git submodule update
+if [ "$?" != "0" ];then
+    fbfu_error "$0: git submodule update failed"
+    exit 1
+fi
 
 if [ ! -f "${fbar_bin}/jshn" ] || [ ! -f "${FBAU_SCRIPTS}/jshn.sh" ];then
     mkdir -p ${fbar_bin}
