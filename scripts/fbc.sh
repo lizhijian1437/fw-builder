@@ -8,7 +8,7 @@
 #depend: base.sh
 #请在fw-builder的环境中使用(build.sh)
 
-#fbc接口，用于配置fw-builder内部参数,只能在FRAME中使用
+#fbc接口，用于配置fw-builder内部参数
 
 #@brief fw-builder参数配置接口
 #@param 需要设置的配置项

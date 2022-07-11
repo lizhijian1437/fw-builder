@@ -106,7 +106,7 @@ function fbfr_handle_node {
     fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_ON" "$fbar_temp_dir")
     if [ "$?" == "4" ];then
         fbfr_gen_hook "$fbar_value"
-        $fbar_hook "START"
+        . $fbar_hook "START"
         fbar_result="$?"
     fi
     touch "${fbar_node_chain}/${fbar_node_name}"
@@ -115,7 +115,7 @@ function fbfr_handle_node {
         fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir")
         if [ "$?" == "4" ];then
             fbfr_gen_hook "$fbar_value"
-            $fbar_hook "EXCEPTION"
+            . $fbar_hook  "$fbar_custom_path" "EXCEPTION"
         fi
         return 1
     fi
@@ -124,7 +124,7 @@ function fbfr_handle_node {
         fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir")
         if [ "$?" == "4" ];then
             fbfr_gen_hook "$fbar_value"
-            $fbar_hook "STOP"
+            . $fbar_hook "$fbar_custom_path" "STOP"
         fi
         return 0
     fi
@@ -142,7 +142,7 @@ function fbfr_handle_node {
                 fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir")
                  if [ "$?" == "4" ];then
                     fbfr_gen_hook "$fbar_value"
-                    $fbar_hook "FORCE"
+                    . $fbar_hook "$fbar_custom_path" "FORCE"
                 fi
                 return 1
             fi
@@ -152,7 +152,7 @@ function fbfr_handle_node {
     fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir")
     if [ "$?" == "4" ];then
         fbfr_gen_hook "$fbar_value"
-        $fbar_hook "STOP"
+        . $fbar_hook "$fbar_custom_path" "STOP"
     fi
     return 0
 }
@@ -169,7 +169,6 @@ function fbfr_node_phase {
     fbfr_handle_node "$fbar_main_node"
 }
 
-#FRAME会在上下文中使用
 fbar_frame_hook=$(fbfu_parse "$fbar_main_node" "FRAME" "$fbar_temp_dir")
 if [ "$?" == "4" ];then
     fbfr_gen_hook "$fbar_frame_hook"
