@@ -18,7 +18,7 @@ cd $fbar_root
 git submodule init
 git submodule update
 if [ "$?" != "0" ];then
-    fbfu_error "$0: git submodule update failed"
+    fbfu_error "git submodule update failed"
     exit 1
 fi
 
