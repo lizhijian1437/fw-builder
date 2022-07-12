@@ -41,6 +41,6 @@ function fbfu_fbc_get {
 function fbfu_fbc_foreach {
     __fbar_tmp_list=($FBAR_FBC_LIST)
     fbfu_kvlist_foreach "FBAR_FBC_LIST" "FBAR_FBC_LIST_SUM" "FBAR_FBC_END" "$1" "$2"
-    return "$fbar_result"
+    return "$?"
 }
 
