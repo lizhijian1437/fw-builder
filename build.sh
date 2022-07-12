@@ -86,23 +86,23 @@ function fbfr_handle_node {
     local fbar_next_node=$1
     local fbar_custom_path=${fbar_next_node%/*}
     local fbar_node_name=${fbar_custom_path##*/}
+    FBAR_CURRENT_NODE="$fbar_custom_path"
     if [ -f "${fbar_node_chain}/${fbar_node_name}" ];then
         fbfu_warn "NODE: ${fbar_node_name} repeat"
         return 0
     fi
     fbfu_info "NODE: ${fbar_node_name} start"
-    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_ON" "$FBAR_TEMP_DIR")
+    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE" "$FBAR_TEMP_DIR")
     if [ "$?" == "4" ];then
         fbfr_gen_hook "$fbar_value"
-        . $fbar_hook "$fbar_custom_path" "START"
+        . $fbar_hook "START"
     fi
     touch "${fbar_node_chain}/${fbar_node_name}"
-    FBAR_CURRENT_NODE="$fbar_next_node"
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
-            fbar_tl_king "ON"
+            fbar_tl_king "START"
         else
-            fbar_tl_attendant "ON"
+            fbar_tl_attendant "START"
         fi
     fi
     local fbar_node_depend=($(fbfu_parse "$fbar_next_node" "DEPEND" "$FBAR_TEMP_DIR"))
@@ -118,17 +118,18 @@ function fbfr_handle_node {
         fi
         fbar_m=$[ "$fbar_m" + 1 ]
     done
+    FBAR_CURRENT_NODE="$fbar_custom_path"
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
-            fbar_tl_king "OFF"
+            fbar_tl_king "FINISH"
         else
-            fbar_tl_attendant "OFF"
+            fbar_tl_attendant "FINISH"
         fi
     fi
-    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$FBAR_TEMP_DIR")
+    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE" "$FBAR_TEMP_DIR")
     if [ "$?" == "4" ];then
         fbfr_gen_hook "$fbar_value"
-        . $fbar_hook "$fbar_custom_path" "STOP"
+        . $fbar_hook "FINISH"
     fi
     return 0
 }
