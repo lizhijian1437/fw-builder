@@ -96,6 +96,8 @@ function fbfr_handle_node {
     if [ "$?" == "4" ];then
         fbfr_gen_hook "$fbar_value"
         . $fbar_hook "START"
+    else
+        fbar_value=""
     fi
     touch "${fbar_node_chain}/${fbar_node_name}"
     if [ "$FBAR_TEMPLATE" != "" ];then
@@ -126,8 +128,7 @@ function fbfr_handle_node {
             fbar_tl_attendant "FINISH"
         fi
     fi
-    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE" "$FBAR_TEMP_DIR")
-    if [ "$?" == "4" ];then
+    if [ "$fbar_value" != "" ];then
         fbfr_gen_hook "$fbar_value"
         . $fbar_hook "FINISH"
     fi
