@@ -100,9 +100,9 @@ function fbfr_handle_node {
     FBAR_CURRENT_NODE="$fbar_next_node"
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
-            fbar_tl_king
+            fbar_tl_king "ON"
         else
-            fbar_tl_attendant
+            fbar_tl_attendant "ON"
         fi
     fi
     local fbar_node_depend=($(fbfu_parse "$fbar_next_node" "DEPEND" "$fbar_temp_dir"))
@@ -118,6 +118,13 @@ function fbfr_handle_node {
         fi
         fbar_m=$[ "$fbar_m" + 1 ]
     done
+    if [ "$FBAR_TEMPLATE" != "" ];then
+        if [ "$fbar_next_node" == "$fbar_main_node" ];then
+            fbar_tl_king "OFF"
+        else
+            fbar_tl_attendant "OFF"
+        fi
+    fi
     fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir")
     if [ "$?" == "4" ];then
         fbfr_gen_hook "$fbar_value"
