@@ -31,14 +31,14 @@ fi
 fbar_node_suffix="fwb.n"
 fbar_template_suffix="tl.sh"
 fbar_module_suffix="ml.sh"
-fbar_build_dir="${FBAU_PROJECT}/build"
-fbar_temp_dir="${fbar_build_dir}/tmp"
-fbar_hook="${fbar_build_dir}/tmp/__hook_sh"
+FBAR_BUILD_DIR="${FBAU_PROJECT}/build"
+FBAR_TEMP_DIR="${FBAR_BUILD_DIR}/tmp"
+fbar_hook="${FBAR_BUILD_DIR}/tmp/__hook_sh"
 fbar_main_node="${FBAU_PROJECT}/${fbar_node_suffix}"
 fbar_nodes_dir="${FBAU_PROJECT}/nodes"
 fbar_modules_dir="${fbar_root}/modules"
 fbar_templates_dir="${fbar_root}/templates"
-fbar_node_temp="${fbar_temp_dir}/node"
+fbar_node_temp="${FBAR_TEMP_DIR}/node"
 fbar_node_chain="${fbar_node_temp}/chain"
 
 if [  ! -f "${fbar_main_node}" ];then
@@ -91,7 +91,7 @@ function fbfr_handle_node {
         return 0
     fi
     fbfu_info "NODE: ${fbar_node_name} start"
-    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_ON" "$fbar_temp_dir")
+    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_ON" "$FBAR_TEMP_DIR")
     if [ "$?" == "4" ];then
         fbfr_gen_hook "$fbar_value"
         . $fbar_hook "$fbar_custom_path" "START"
@@ -105,7 +105,7 @@ function fbfr_handle_node {
             fbar_tl_attendant "ON"
         fi
     fi
-    local fbar_node_depend=($(fbfu_parse "$fbar_next_node" "DEPEND" "$fbar_temp_dir"))
+    local fbar_node_depend=($(fbfu_parse "$fbar_next_node" "DEPEND" "$FBAR_TEMP_DIR"))
     local fbar_rdsize=${#fbar_node_depend[@]}
     fbfu_info "NODE: ${fbar_node_name} --> ${fbar_node_depend[@]}"
     while [ "$fbar_m" -lt "$fbar_rdsize" ];do
@@ -125,7 +125,7 @@ function fbfr_handle_node {
             fbar_tl_attendant "OFF"
         fi
     fi
-    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$fbar_temp_dir")
+    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE_OFF" "$FBAR_TEMP_DIR")
     if [ "$?" == "4" ];then
         fbfr_gen_hook "$fbar_value"
         . $fbar_hook "$fbar_custom_path" "STOP"
@@ -151,7 +151,7 @@ function fbfr_template_search {
 }
 
 function fbfr_import_template {
-    local fbar_value=$(fbfu_parse "$fbar_main_node" "TEMPLATE" "$fbar_temp_dir")
+    local fbar_value=$(fbfu_parse "$fbar_main_node" "TEMPLATE" "$FBAR_TEMP_DIR")
     if [ "$fbar_value" == "" ];then
         return
     fi
