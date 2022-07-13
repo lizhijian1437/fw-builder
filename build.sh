@@ -28,13 +28,13 @@ fi
 . ${FBAU_SCRIPTS}/parser.sh
 . ${FBAU_SCRIPTS}/fbc.sh
 
-fbar_node_suffix="fwb.n"
+FBAR_NODE_SUFFIX="fwb.n"
 fbar_template_suffix="tl.sh"
-fbar_module_suffix="ml.sh"
+FBAR_MODULE_SUFFIX="ml.sh"
 FBAR_BUILD_DIR="${FBAU_PROJECT}/build"
 FBAR_TEMP_DIR="${FBAR_BUILD_DIR}/tmp"
 fbar_hook="${FBAR_BUILD_DIR}/tmp/__hook_sh"
-fbar_main_node="${FBAU_PROJECT}/${fbar_node_suffix}"
+fbar_main_node="${FBAU_PROJECT}/${FBAR_NODE_SUFFIX}"
 fbar_nodes_dir="${FBAU_PROJECT}/nodes"
 fbar_modules_dir="${fbar_root}/modules"
 fbar_templates_dir="${fbar_root}/templates"
@@ -61,7 +61,7 @@ fbfr_fbc_init
 function fbfr_node_search {
     local fbar_check_key=$(echo "$1" | grep "^NPATH_")
     if [ "$fbar_check_key" != "" ];then
-        local fbar_search_file="$2/$4/${fbar_node_suffix}"
+        local fbar_search_file="$2/$4/${FBAR_NODE_SUFFIX}"
         if [ -f "$fbar_search_file" ];then
             echo "$fbar_search_file"
             return 1

@@ -18,7 +18,7 @@ function fbfu_fbc_set {
     local fbar_key=$1
     local fbar_value=$2
     fbfu_kvlist_set "FBAR_FBC_LIST" "FBAR_FBC_LIST_SUM" "FBAR_FBC_END" "$fbar_key" "$fbar_value"
-    return $?
+    return "$?"
 }
 
 #@brief fw-builder配置获取接口
@@ -39,8 +39,35 @@ function fbfu_fbc_get {
 #@param 私有参数
 #@return 若回调函数返回非0值，则会停止遍历，并且返回该值，否则会返回0
 function fbfu_fbc_foreach {
-    __fbar_tmp_list=($FBAR_FBC_LIST)
     fbfu_kvlist_foreach "FBAR_FBC_LIST" "FBAR_FBC_LIST_SUM" "FBAR_FBC_END" "$1" "$2"
     return "$?"
+}
+
+function fbfr_module_search {
+    local fbar_check_key=$(echo "$1" | grep "^MODULES_")
+    if [ "$fbar_check_key" != "" ];then
+        local fbar_search_module="$2/$4"
+        if [ -f "${fbar_search_module}/${FBAR_MODULE_SUFFIX}" ];then
+            echo "$fbar_search_module"
+            return 1
+        else
+            return 0
+        fi
+    else
+        return 0
+    fi
+}
+
+#@brief fw-builder模块调用接口
+#@param 模块名
+#@return 返回模块调用结果
+function fbfu_fbc_module {
+    local fbar_module=$(fbfu_fbc_foreach "fbfr_module_search" "$1")
+    if [ "$fbar_module" != "" ];then
+        eval ${fbar_module}/${FBAR_MODULE_SUFFIX} \"${FBAR_CURRENT_NODE}/${FBAR_NODE_SUFFIX}\" \"$FBAR_TEMP_DIR\" \"$fbar_module\"
+        return "$?"
+    else
+        return 1
+    fi
 }
 
