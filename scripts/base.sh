@@ -311,3 +311,18 @@ function fbfu_kvlist_get {
     fi
 }
 
+#@brief 强制新建文件
+#@param 文件路径
+#@param 需要获取的键
+function fbfu_force_touch {
+    local fbar_file=$1
+    local fbar_path=${fbar_file%/*}
+    if [ "$fbar_path" != "" ];then
+        mkdir -p "$fbar_path" 1>/dev/null 2>&1
+        if [ ! -d "$fbar_path" ];then
+            return 1
+        fi
+    fi
+    touch $fbar_file 1>/dev/null 2>&1
+    return "$?"
+}
