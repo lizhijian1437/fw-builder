@@ -60,11 +60,16 @@ function fbfr_module_search {
 
 #@brief fw-builder模块调用接口
 #@param 模块名
+#@param 配置路径（默认是当前配置）
 #@return 返回模块调用结果
 function fbfu_fbc_module {
     local fbar_module=$(fbfu_fbc_foreach "fbfr_module_search" "$1")
+    local fbar_config="$2"
+    if [ ! -f "$fbar_config" ];then
+        fbar_config="${FBAU_CURRENT_NODE}/${FBAR_NODE_SUFFIX}"
+    fi
     if [ "$fbar_module" != "" ];then
-        eval ${fbar_module}/${FBAR_MODULE_SUFFIX} \"${FBAR_CURRENT_NODE}/${FBAR_NODE_SUFFIX}\" \"$FBAR_TEMP_DIR\" \"$fbar_module\"
+        eval ${fbar_module}/${FBAR_MODULE_SUFFIX} \"${fbar_config}\" \"${FBAR_TEMP_DIR}\" \"${fbar_module}\"
         return "$?"
     else
         return 1
