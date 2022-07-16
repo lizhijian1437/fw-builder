@@ -66,7 +66,7 @@ function fbfu_fbc_module {
     local fbar_module=$(fbfu_fbc_foreach "fbfr_module_search" "$1")
     local fbar_config="$2"
     if [ ! -f "$fbar_config" ];then
-        fbar_config="${FBAU_CURRENT_NODE}/${FBAR_NODE_SUFFIX}"
+        fbar_config="${FBAU_CURRENT_NODE_PATH}/${FBAU_NODE_SUFFIX}"
     fi
     if [ "$fbar_module" != "" ];then
         eval ${fbar_module}/${FBAR_MODULE_SUFFIX} \"${fbar_config}\" \"${FBAR_TEMP_DIR}\" \"${fbar_module}\"

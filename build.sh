@@ -28,13 +28,13 @@ fi
 . ${FBAU_SCRIPTS}/parser.sh
 . ${FBAU_SCRIPTS}/fbc.sh
 
-FBAR_NODE_SUFFIX="fwb.n"
+export FBAU_NODE_SUFFIX="fwb.n"
 fbar_template_suffix="tl.sh"
 FBAR_MODULE_SUFFIX="ml.sh"
 FBAR_BUILD_DIR="${FBAU_PROJECT}/build"
 FBAR_TEMP_DIR="${FBAR_BUILD_DIR}/tmp"
 fbar_hook="${FBAR_BUILD_DIR}/tmp/__hook_sh"
-fbar_main_node="${FBAU_PROJECT}/${FBAR_NODE_SUFFIX}"
+fbar_main_node="${FBAU_PROJECT}/${FBAU_NODE_SUFFIX}"
 fbar_nodes_dir="${FBAU_PROJECT}/nodes"
 fbar_modules_dir="${fbar_root}/modules"
 fbar_templates_dir="${fbar_root}/templates"
@@ -61,7 +61,7 @@ fbfr_fbc_init
 function fbfr_node_search {
     local fbar_check_key=$(echo "$1" | grep "^NPATH_")
     if [ "$fbar_check_key" != "" ];then
-        local fbar_search_file="$2/$4/${FBAR_NODE_SUFFIX}"
+        local fbar_search_file="$2/$4/${FBAU_NODE_SUFFIX}"
         if [ -f "$fbar_search_file" ];then
             echo "$fbar_search_file"
             return 1
@@ -86,7 +86,8 @@ function fbfr_handle_node {
     local fbar_next_node=$1
     local fbar_custom_path=${fbar_next_node%/*}
     local fbar_node_name=${fbar_custom_path##*/}
-    export FBAU_CURRENT_NODE="$fbar_custom_path"
+    export FBAU_CURRENT_NODE_PATH="$fbar_custom_path"
+    export FBAU_CURRENT_NODE_NAME="$fbar_node_name"
     if [ -f "${fbar_node_chain}/${fbar_node_name}" ];then
         fbfu_warn "NODE: ${fbar_node_name} repeat"
         return 0
@@ -120,7 +121,8 @@ function fbfr_handle_node {
         fi
         fbar_m=$[ "$fbar_m" + 1 ]
     done
-    export FBAU_CURRENT_NODE="$fbar_custom_path"
+    export FBAU_CURRENT_NODE_PATH="$fbar_custom_path"
+    export FBAU_CURRENT_NODE_NAME="$fbar_node_name"
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
             fbar_tl_king "FINISH"
