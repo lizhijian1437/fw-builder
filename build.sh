@@ -6,7 +6,7 @@
 #fbar 私有参数
 
 fbar_root=$(dirname $(readlink -f $0))
-fbar_bin="${fbar_root}/bin"
+export FBAU_BIN="${fbar_root}/bin"
 export FBAU_PROJECT=$(pwd)
 export FBAU_SCRIPTS="${fbar_root}/scripts"
 
@@ -19,9 +19,9 @@ if [ "$?" != "0" ];then
 fi
 
 if [ "$PATH" == "" ];then
-    export PATH="$fbar_bin"
+    export PATH="$FBAU_BIN"
 else
-    export PATH="${PATH}:${fbar_bin}"
+    export PATH="${PATH}:${FBAU_BIN}"
 fi
 
 . ${FBAU_SCRIPTS}/jshn.sh
@@ -86,7 +86,7 @@ function fbfr_handle_node {
     local fbar_next_node=$1
     local fbar_custom_path=${fbar_next_node%/*}
     local fbar_node_name=${fbar_custom_path##*/}
-    FBAR_CURRENT_NODE="$fbar_custom_path"
+    export FBAU_CURRENT_NODE="$fbar_custom_path"
     if [ -f "${fbar_node_chain}/${fbar_node_name}" ];then
         fbfu_warn "NODE: ${fbar_node_name} repeat"
         return 0
@@ -99,7 +99,7 @@ function fbfr_handle_node {
     else
         fbar_value=""
     fi
-    touch "${fbar_node_chain}/${fbar_node_name}"
+    fbfu_force_touch "${fbar_node_chain}/${fbar_node_name}"
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
             fbar_tl_king "START"
@@ -120,7 +120,7 @@ function fbfr_handle_node {
         fi
         fbar_m=$[ "$fbar_m" + 1 ]
     done
-    FBAR_CURRENT_NODE="$fbar_custom_path"
+    export FBAU_CURRENT_NODE="$fbar_custom_path"
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
             fbar_tl_king "FINISH"
