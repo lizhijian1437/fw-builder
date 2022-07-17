@@ -86,6 +86,8 @@ function fbfr_handle_node {
     local fbar_next_node=$1
     local fbar_custom_path=${fbar_next_node%/*}
     local fbar_node_name=${fbar_custom_path##*/}
+    export FBAU_CURRENT_NODE_PATH="$fbar_custom_path"
+    export FBAU_CURRENT_NODE_NAME="$fbar_node_name"
     if [ "$fbar_next_node" == "$fbar_main_node" ];then
         export FBAU_PROJECT_NAME=$(fbfu_parse "$fbar_next_node" "PROJECT_NAME" "$FBAR_TEMP_DIR")
         if [ "$FBAU_PROJECT_NAME" == "" ];then
@@ -96,19 +98,33 @@ function fbfr_handle_node {
             fbfu_error "please set PROJECT_VERSION"
             exit 1
         fi
+        if [ "$FBAR_TEMPLATE" != "" ];then
+            fbfu_info "[${fbar_node_name}]KING INIT"
+            fbar_tl_king "INIT"
+        fi
+        fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE" "$FBAR_TEMP_DIR")
+        if [ "$?" == "4" ];then
+            fbfu_info "[${fbar_node_name}]TRACE INIT"
+            fbfr_gen_hook "$fbar_value"
+            . $fbar_hook "INIT"
+        else
+            fbar_value=""
+        fi
     fi
     if [ -f "${fbar_node_chain}/${fbar_node_name}" ];then
-        fbfu_warn "NODE: ${fbar_node_name} repeat"
+        fbfu_warn "[${fbar_node_name}]REPEAT"
         return 0
     fi
     local fbar_node_depend=($(fbfu_parse "$fbar_next_node" "DEPEND" "$FBAR_TEMP_DIR"))
     local fbar_rdsize=${#fbar_node_depend[@]}
-    fbfu_info "NODE: ${fbar_node_name} --> ${fbar_node_depend[@]}"
+    if [ "$fbar_rdsize" -gt "0" ];then
+        fbfu_info "[${fbar_node_name}]DEPEND ${fbar_node_depend[@]}"
+    fi
     while [ "$fbar_m" -lt "$fbar_rdsize" ];do
         local fbar_next_depend=${fbar_node_depend[$fbar_m]}
         local fbar_next_depend_node=$(fbfu_fbc_foreach "fbfr_node_search" "$fbar_next_depend")
         if [ "$fbar_next_depend_node" == "" ];then
-            fbfu_warn "NODE: ${fbar_next_depend} not exist"
+            fbfu_warn "[${fbar_node_name}]${fbar_next_depend} not exist"
         else
             fbfr_handle_node "$fbar_next_depend_node"
         fi
@@ -117,29 +133,37 @@ function fbfr_handle_node {
     export FBAU_CURRENT_NODE_PATH="$fbar_custom_path"
     export FBAU_CURRENT_NODE_NAME="$fbar_node_name"
     fbfu_force_touch "${fbar_node_chain}/${fbar_node_name}"
-    fbfu_info "NODE: ${fbar_node_name} start"
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
+            fbfu_info "[${fbar_node_name}]KING ENV"
             fbar_tl_king "ENV"
         else
+            fbfu_info "[${fbar_node_name}]ATTENDANT ENV"
             fbar_tl_attendant "ENV"
         fi
     fi
-    fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE" "$FBAR_TEMP_DIR")
-    if [ "$?" == "4" ];then
+    if [ "$fbar_value" == "" ];then
+        fbar_value=$(fbfu_parse "$fbar_next_node" "TRACE" "$FBAR_TEMP_DIR")
+        if [ "$?" != "4" ];then
+            fbar_value=""
+        fi
+    fi
+    if [ "$fbar_value" != "" ];then
+        fbfu_info "[${fbar_node_name}]TRACE START"
         fbfr_gen_hook "$fbar_value"
         . $fbar_hook "START"
-    else
-        fbar_value=""
     fi
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
+            fbfu_info "[${fbar_node_name}]KING START"
             fbar_tl_king "START"
         else
+            fbfu_info "[${fbar_node_name}]ATTENDANT START"
             fbar_tl_attendant "START"
         fi
     fi
     if [ "$fbar_value" != "" ];then
+        fbfu_info "[${fbar_node_name}]TRACE FINISH"
         fbfr_gen_hook "$fbar_value"
         . $fbar_hook "FINISH"
     fi
