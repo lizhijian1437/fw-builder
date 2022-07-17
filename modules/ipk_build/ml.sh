@@ -27,8 +27,8 @@ fbar_control="${fbar_root}/CONTROL/control"
 
 fbar_out=$(fbfu_parse "$fbar_config" "IPK_PACKAGE_OUT" "$fbar_temp_path")
 mkdir -p $fbar_out 1>/dev/null 2>&1
-if [ ! -d "$fbar_root" ];then
-    fbfu_error "[IPK] opkg root not exist"
+if [ ! -d "$fbar_out" ];then
+    fbfu_error "[IPK] opkg out not exist"
     exit 1
 fi
 
@@ -84,8 +84,14 @@ if [ "$fbar_arch" == "" ];then
     exit 1
 fi
 
-echo "$fbar_package_name $fbar_package_version $fbar_arch"
-$fbar_ipk_build -O "${fbar_package_name}_${fbar_arch}_${fbar_package_version}.ipk" "${fbar_root}" "${fbar_out}"
+fbar_ipk_out="${fbar_root}/__ipk_out"
+fbar_ipk_name="${fbar_package_name}_${fbar_arch}_${fbar_package_version}.ipk"
+mkdir -p $fbar_ipk_out
+$fbar_ipk_build -O "$fbar_ipk_name" "${fbar_root}" "${fbar_ipk_out}"
 fbar_result="$?"
-chmod 755 ${fbar_out}/${fbar_package_name}_${fbar_arch}_${fbar_package_version}.ipk 1>/dev/null 2>&1
+if [ -f "${fbar_ipk_out}/${fbar_ipk_name}" ];then
+    chmod 755 ${fbar_ipk_out}/${fbar_ipk_name} 1>/dev/null 2>&1
+    cp ${fbar_ipk_out}/${fbar_ipk_name} ${fbar_out} 1>/dev/null 2>&1
+    fbfu_force_touch "${fbar_ipk_out}/__ipk_build_ok"
+fi
 exit "$fbar_result"
