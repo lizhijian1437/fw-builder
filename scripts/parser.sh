@@ -142,6 +142,7 @@ function fbfu_parse {
         fbar_key="$fbar_alias"
     fi
     local fbar_next=$(fbfu_parse_kv "$fbar_file" "__NEXT_CONFIG" ":=")
+    fbar_next=$(fbfu_convert_variable "$fbar_next")
     if [  -f "$fbar_next" ];then
         fbar_value=$(fbfu_parse "$fbar_next" "$fbar_key" "$fbar_temp_path")
         fbar_result="$?"
@@ -180,4 +181,3 @@ function fbfu_parse {
     fbfu_convert_variable "$fbar_value"
     return 2
 }
-
