@@ -69,10 +69,26 @@ function fbfu_fbc_module {
         fbar_config="${FBAU_CURRENT_NODE_PATH}/${FBAU_NODE_SUFFIX}"
     fi
     if [ "$fbar_module" != "" ];then
-        eval ${fbar_module}/${FBAR_MODULE_SUFFIX} \"${fbar_config}\" \"${FBAR_TEMP_DIR}\" \"${fbar_module}\"
+        ${fbar_module}/${FBAR_MODULE_SUFFIX} "$fbar_config" "$FBAR_TEMP_DIR" "$fbar_module"
         return "$?"
     else
         return 1
     fi
+}
+
+
+#@brief fw-builder配置解析接口
+#@param 需要解析的key
+#@param 配置路径（默认是当前配置）
+#@return 若解析成功，返回解析的字符串
+#@note 0表示成功，1表示解析失败，2表示字符串，3表示数组，4表示hook
+function fbfu_fbc_parse {
+    local fbar_key="$1"
+    local fbar_config="$2"
+    if [ ! -f "$fbar_config" ];then
+        fbar_config="${FBAU_CURRENT_NODE_PATH}/${FBAU_NODE_SUFFIX}"
+    fi
+    fbfu_parse "$fbar_config" "$fbar_key" "$FBAR_TEMP_DIR"
+    return "$?"
 }
 
