@@ -26,7 +26,7 @@ function fbfu_line_foreach {
         if [ "$fbar_line" == "" ];then
             continue
         fi
-        eval ${fbar_hook} \"${fbar_line}\" \"${fbar_args}\"
+        fbar_hook "$fbar_line" "$fbar_args"
         fbar_result=$?
         if [ "$fbar_result" !=  "0" ];then
             return 1
