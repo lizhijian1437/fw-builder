@@ -155,7 +155,7 @@ function expand_list_foreach {
     local fbar_result=0
     while [ "$fbar_begin" -le "$fbar_end" ];do
         local fbar_next=$(expand_list_get "$fbar_expand_list" "$fbar_begin")
-        eval ${fbar_hook} \"${fbar_next}\" \"${fbar_begin}\" \"${fbar_args}\"
+        $fbar_hook "$fbar_next" "$fbar_begin" "$fbar_args"
         fbar_result="$?"
         if [ "$fbar_result" != "0" ];then
             return "$fbar_result"
@@ -246,7 +246,7 @@ function fbfu_kvlist_foreach {
             continue
         fi
         local fbar_value=$(echo "$fbar_next" | sed -e 's/^.*|//')
-        eval ${fbar_hook} \"${fbar_key}\" \"${fbar_value}\" \"${fbar_m}\" \"${fbar_args}\"
+        $fbar_hook "$fbar_key" "$fbar_value" "$fbar_m" "$fbar_args"
         fbar_result="$?"
         if [ "$fbar_result" != "0" ];then
             return "$fbar_result"
@@ -324,5 +324,65 @@ function fbfu_force_touch {
         fi
     fi
     touch $fbar_file 1>/dev/null 2>&1
+    return "$?"
+}
+
+function __fbfr_traverse_dir {
+    local fbar_dir=$1
+    local fbar_hook=$2
+    local fbar_current=$3
+    local fbar_begin=$4
+    local fbar_finish=$5
+    local fbar_next=$[ "$fbar_current" + 1 ]
+    local fbar_file=""
+    local fbar_result=0
+    if [ "$fbar_finish" != "" ];then
+        if [ "$fbar_current" -gt "$fbar_finish"  ];then
+            return 0
+        fi
+    fi
+    for fbar_file in $(ls -a $fbar_dir);do
+        local fbar_exec="true"
+        local fbar_file_abs="${fbar_dir}/${fbar_file}"
+        if [ "$fbar_file" != "." ] && [ "$fbar_file" != ".." ];then
+            if [ "$fbar_current" -ge "$fbar_begin" ];then
+                $fbar_hook "$fbar_file_abs" "$fbar_current" "$6"
+                fbar_result="$?"
+                if [ "$fbar_result" != "0" ];then
+                    return "$fbar_result"
+                fi
+            fi
+        fi
+        if [ "$fbar_file" != "." ] && [ "$fbar_file" != ".." ] && [ -d "$fbar_file_abs" ];then
+            __fbfr_traverse_dir "$fbar_file_abs" "$fbar_hook" "$fbar_next" "$fbar_begin" "$fbar_finish" "$6"
+            fbar_result="$?"
+            if [ "$fbar_result" != "0" ];then
+                return "$fbar_result"
+            fi
+        fi
+    done
+    return 0
+}
+
+#@brief 遍历文件夹
+#@param 文件夹路径
+#@param 开始层数(默认是0)
+#@param 结束层数(默认是遍历全部)
+#@param 回调函数($1:文件路径 $2:层数 $3:私有参数)
+#@param 私有参数
+#@param 需要获取的键
+#@return 若回调函数返回非0值，则会停止遍历，并且返回该值，否则会返回0
+function fbfu_traverse_dir {
+    local fbar_dir=$1
+    local fbar_hook=$2
+    local fbar_begin=$3
+    local fbar_finish=$4
+    if [ "$fbar_dir" == "" ] || [ "$fbar_hook" == "" ];then
+        return 1
+    fi
+    if [ "$fbar_begin" == "" ];then
+        fbar_begin=0
+    fi
+    __fbfr_traverse_dir "$fbar_dir" "$fbar_hook" "0" "$fbar_begin" "$fbar_finish" "$5"
     return "$?"
 }
