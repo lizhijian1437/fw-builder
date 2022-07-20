@@ -27,10 +27,8 @@ function fbfu_fbc_set {
 function fbfu_fbc_get {
     local fbar_key=$1
     local fbar_result=0
-    local fbar_value=$(fbfu_kvlist_get "FBAR_FBC_LIST" "FBAR_FBC_LIST_SUM" "FBAR_FBC_END" "$fbar_key")
-    fbar_result=$?
-    echo "$fbar_value"
-    return "$fbar_result"
+    fbfu_kvlist_get "FBAR_FBC_LIST" "FBAR_FBC_LIST_SUM" "FBAR_FBC_END" "$fbar_key"
+    return "$?"
 }
 
 #@brief fw-builder配置遍历接口
