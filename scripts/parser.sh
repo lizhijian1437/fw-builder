@@ -382,7 +382,7 @@ function fbfu_parse_partition {
     fbar_partition_end[0]=-1
     fbfu_string_line_foreach "$fbar_partition" "fbar_init_partition"
     fbar_partition_begin[$fbar_partition_sum]="END"
-    fbar_partition_end[$fbar_partition_sum]=0
+    fbar_partition_end[$fbar_partition_sum]=-1
     fbar_partition_sum=$[ $fbar_partition_sum + 1]
     if [ "$fbar_partition_sum" -le "2" ];then
         return 1
