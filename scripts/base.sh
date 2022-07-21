@@ -136,7 +136,8 @@ function expand_list_init {
 #@param 需要取出值的序号
 #@return 返回扩展列表
 function expand_list_get {
-    echo "$1" | sed -n "$2p"
+    local fbar_value=$(echo "$1" | sed -n "$2p")
+    fbfu_string_slim "$fbar_value"
 }
 
 #@brief 遍历扩展列表
