@@ -137,7 +137,8 @@ function expand_list_init {
 #@return 返回扩展列表
 function expand_list_get {
     local fbar_value=$(echo "$1" | sed -n "$2p")
-    fbfu_string_slim "$fbar_value"
+    fbar_value=$(fbfu_string_slim "$fbar_value")
+    fbfu_convert_variable "$fbar_value"
 }
 
 #@brief 遍历扩展列表
