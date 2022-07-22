@@ -6,6 +6,7 @@
 #fbar 私有参数
 
 . ${FBAU_SCRIPTS}/base.sh
+. ${FBAU_SCRIPTS}/jshn.sh
 . ${FBAU_SCRIPTS}/parser.sh
 
 fbar_config=$1
