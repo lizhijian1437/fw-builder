@@ -41,7 +41,7 @@ function fbfu_fbc_foreach {
     return "$?"
 }
 
-function fbfr_module_search {
+function __fbfr_module_search {
     local fbar_check_key=$(echo "$1" | grep "^MODULES_")
     if [ "$fbar_check_key" != "" ];then
         local fbar_search_module="$2/$4"
@@ -61,7 +61,7 @@ function fbfr_module_search {
 #@param 配置路径（默认是当前配置）
 #@return 返回模块调用结果
 function fbfu_fbc_module {
-    local fbar_module=$(fbfu_fbc_foreach "fbfr_module_search" "$1")
+    local fbar_module=$(fbfu_fbc_foreach "__fbfr_module_search" "$1")
     local fbar_config="$2"
     if [ ! -f "$fbar_config" ];then
         fbar_config="${FBAU_CURRENT_NODE_PATH}/${FBAU_NODE_SUFFIX}"
