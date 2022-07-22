@@ -230,13 +230,13 @@ function fbar_init_partition {
     if [ "$fbar_note" != "" ];then
         return 0
     fi
-    fbar_list=$(expand_list_init "$1")
+    fbar_list=$(fbfu_expand_list_init "$1")
     fbar_list_sum="$?"
     if [ "$fbar_list_sum" -lt "2" ];then
         return 0
     fi
-    local fbar_address=$(expand_list_get "$fbar_list" "1")
-    local fbar_source=$(expand_list_get "$fbar_list" "2")
+    local fbar_address=$(fbfu_expand_list_get "$fbar_list" "1")
+    local fbar_source=$(fbfu_expand_list_get "$fbar_list" "2")
     if [ "$fbar_address" == "" ] || [ "$fbar_source" == "" ];then
         return 0
     fi

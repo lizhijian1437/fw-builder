@@ -124,7 +124,7 @@ function fbfu_error {
 #@brief 初始化扩展列表,格式"VALUE1|VALUE2|VALUE3"
 #@param 参数字符串
 #@return 返回扩展列表，以及列表中值的数量
-function expand_list_init {
+function fbfu_expand_list_init {
     local fbar_expand_list=$(echo "$1" | awk 'BEGIN{RS="|";} { print $0 }')
     local fbar_expand_list_sum=$(echo "$fbar_expand_list" | sed -n '$=')
     echo "$fbar_expand_list"
@@ -135,7 +135,7 @@ function expand_list_init {
 #@param 扩展列表
 #@param 需要取出值的序号
 #@return 返回扩展列表
-function expand_list_get {
+function fbfu_expand_list_get {
     local fbar_value=$(echo "$1" | sed -n "$2p")
     fbar_value=$(fbfu_string_slim "$fbar_value")
     fbfu_convert_variable "$fbar_value"
@@ -148,7 +148,7 @@ function expand_list_get {
 #@param 回调函数($1:值 $2:序号 $3:私有参数)
 #@param 私有参数
 #@return 若回调函数返回非0值，则会停止遍历，并且返回该值，否则会返回0
-function expand_list_foreach {
+function fbfu_expand_list_foreach {
     local fbar_expand_list=$1
     local fbar_begin=$2
     local fbar_end=$3
@@ -156,7 +156,7 @@ function expand_list_foreach {
     local fbar_args=$5
     local fbar_result=0
     while [ "$fbar_begin" -le "$fbar_end" ];do
-        local fbar_next=$(expand_list_get "$fbar_expand_list" "$fbar_begin")
+        local fbar_next=$(fbfu_expand_list_get "$fbar_expand_list" "$fbar_begin")
         $fbar_hook "$fbar_next" "$fbar_begin" "$fbar_args"
         fbar_result="$?"
         if [ "$fbar_result" != "0" ];then
