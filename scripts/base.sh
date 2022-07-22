@@ -319,6 +319,9 @@ function fbfu_kvlist_get {
 function fbfu_force_touch {
     local fbar_file=$1
     local fbar_path=${fbar_file%/*}
+    if [ "$fbar_file" == "" ];then
+        return 1
+    fi
     if [ "$fbar_path" != "" ];then
         mkdir -p "$fbar_path" 1>/dev/null 2>&1
         if [ ! -d "$fbar_path" ];then
@@ -387,4 +390,25 @@ function fbfu_traverse_dir {
     fi
     __fbfr_traverse_dir "$fbar_dir" "$fbar_hook" "0" "$fbar_begin" "$fbar_finish" "$5"
     return "$?"
+}
+
+#@brief 生成填充文件 
+#@param 文件大小
+#@param 十六进制填充符号(0xff)
+#@param 输出目录
+function fbfu_fill_file {
+    local fbar_size=$1
+    local fbar_symbol=$2
+    local fbar_output=$3
+    if [ "$fbar_size" == "" ] || [ "$fbar_symbol" == "" ] || [ "$fbar_output" == "" ];then
+        return 1
+    fi
+    local fbar_convert=$(echo "$fbar_symbol" |  sed -e "s/^0x//g")
+    dd if=/dev/zero of=$fbar_output bs=$fbar_size count=1 1>/dev/null 2>&1
+    if [ -f "$fbar_output" ];then
+        sed -i "s/\x00/\x${fbar_convert}/g" $fbar_output
+        return 0
+    else
+        return 1
+    fi
 }
