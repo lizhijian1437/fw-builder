@@ -17,7 +17,7 @@ function fbar_king_init {
     export FBAU_PACKAGE_OUT="${FBAU_NODE_BUILD_DIR}/out"
     export FBAU_ROOTFS_ROOT="${FBAU_NODE_BUILD_DIR}/rootfs"
     export FBAU_IPK_INSTALL_DIR="${FBAU_NODE_BUILD_DIR}/ipk_install"
-    local fbar_partiton=$(fbfu_fbc_parse "FIRMWARE_OUTPUT" "${FBAR_TEMPLATE}/config/fw_build.n")
+    local fbar_partition=$(fbfu_fbc_parse "FIRMWARE_OUTPUT" "${FBAR_TEMPLATE}/config/fw_build.n")
     if [ -f "$fbar_partition" ];then
         rm -rf "$fbar_partition"
     fi
