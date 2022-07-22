@@ -246,7 +246,7 @@ function fbar_init_partition {
         fi
         fbar_partition_begin[$fbar_partition_sum]="FILL"
         fbar_partition_end[$fbar_partition_sum]="FILL"
-        fbar_partition_source[$fbar_partition_sum]="FILL"
+        fbar_partition_source[$fbar_partition_sum]="$fbar_source"
         fbar_partition_args[$fbar_partition_sum]="$1"
         __fbar_partition_last_type="FILL"
         fbar_partition_sum=$[ "$fbar_partition_sum" + 1 ]
@@ -261,11 +261,7 @@ function fbar_init_partition {
             fi
             fbar_partition_source[$fbar_partition_sum]="$fbar_source"
         else
-            fbar_source_size=$(printf %d "$fbar_source")
-            if [ "$fbar_source_size" == "0" ];then
-                return 0
-            fi
-            fbar_partition_source[$fbar_partition_sum]="FILL"
+            return 0
         fi
         fbar_partition_begin[$fbar_partition_sum]="$fbar_addr_num"
         fbar_partition_end[$fbar_partition_sum]=$[ "$fbar_addr_num" + "$fbar_source_size" - 1 ] 
@@ -316,8 +312,11 @@ function fbfr_check_partition {
         local fbar_current_begin="${fbar_partition_begin[$fbar_m]}"
         local fbar_current_end="${fbar_partition_end[$fbar_m]}"
         local fbar_current_source="${fbar_partition_source[$fbar_m]}"
+        if [ "$fbar_current_end" == "END" ];then
+            return 0
+        fi
         if [ "$fbar_current_begin" -gt "$fbar_current_end" ];then
-            if [ "$fbar_current_source" != "FILL" ];then
+            if [ -f "$fbar_current_source" ];then
                 fbar_partition_end[$fbar_m]="${fbar_current_end}|ERROR"
                 return 1
             else
