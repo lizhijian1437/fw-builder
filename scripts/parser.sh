@@ -369,7 +369,6 @@ function fbfu_json_partition {
 
 #@brief 解析分区表
 #@param 分区表
-#@param 私有参数
 #@return 解析完成后以json格式返回
 function fbfu_parse_partition {
     local fbar_result=0
