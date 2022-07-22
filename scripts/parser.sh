@@ -241,6 +241,10 @@ function fbar_init_partition {
         return 0
     fi
     if [ "$fbar_address" == "FILL" ];then
+        local fbar_check_source=$(echo "$fbar_source" | grep "0x[0-9a-f][0-9a-f]")
+        if [ "$fbar_check_source" == "" ];then
+            return 0
+        fi
         if [ "$__fbar_partition_last_type" == "FILL" ];then
             return 0
         fi
