@@ -17,6 +17,10 @@ function fbar_king_init {
     export FBAU_PACKAGE_OUT="${FBAU_NODE_BUILD_DIR}/out"
     export FBAU_ROOTFS_ROOT="${FBAU_NODE_BUILD_DIR}/rootfs"
     export FBAU_IPK_INSTALL_DIR="${FBAU_NODE_BUILD_DIR}/ipk_install"
+    local fbar_partiton=$(fbfu_fbc_parse "FIRMWARE_OUTPUT" "${FBAR_TEMPLATE}/config/fw_build.n")
+    if [ -f "$fbar_partition" ];then
+        rm -rf "$fbar_partition"
+    fi
     if [ -d "$FBAU_PACKAGE_OUT" ];then
         rm -rf $FBAU_PACKAGE_OUT
     fi
@@ -31,15 +35,22 @@ function fbar_king_init {
     mkdir -p $FBAU_IPK_INSTALL_DIR
 }
 
+function fbar_king_env {
+    export FBAU_NODE_BUILD_DIR="${fbar_template_build}/${FBAU_CURRENT_NODE_NAME}"
+}
+
 function fbar_tl_king {
     if [ "$1" == "INIT" ];then
         fbar_king_init
+    elif [ "$1" == "ENV" ];then
+        fbar_king_env
     elif [ "$1" == "START" ];then
         if [ "$FBAU_DEFAULT_ARCH" == "" ];then
             fbfr_search_arch
         fi
         fbfu_fbc_module "opkg_rmpkg" "${FBAR_TEMPLATE}/config/opkg.n"
         fbfu_fbc_module "opkg_install" "${FBAR_TEMPLATE}/config/opkg.n"
+        fbfu_fbc_module "fw_build" "${FBAR_TEMPLATE}/config/fw_build.n"
     fi
 }
 
