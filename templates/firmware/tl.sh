@@ -88,6 +88,7 @@ function fbar_tl_attendant {
         fbar_attendant_env
     elif [ "$1" == "START" ];then
         if [ "$fbar_ipk_rebuild" == "true" ];then
+            fbfu_info "[${FBAU_CURRENT_NODE_NAME}]BUILD PACKAGE"
             fbfu_fbc_module "ipk_build" "${FBAR_TEMPLATE}/config/ipk-build.n"
         fi
     fi
