@@ -13,6 +13,7 @@ function fbfr_search_arch {
 }
 
 function fbar_king_init {
+    local fbar_toolchains_dir="${FBAU_PROJECT}/toolchains"
     export FBAU_NODE_BUILD_DIR="${fbar_template_build}/${FBAU_CURRENT_NODE_NAME}"
     export FBAU_PACKAGE_OUT="${FBAU_NODE_BUILD_DIR}/out"
     export FBAU_ROOTFS_ROOT="${FBAU_NODE_BUILD_DIR}/rootfs"
@@ -33,6 +34,7 @@ function fbar_king_init {
         rm -rf $FBAU_IPK_INSTALL_DIR
     fi
     mkdir -p $FBAU_IPK_INSTALL_DIR
+    fbfu_fbc_set "TOOLCHAIN_BASE" "$fbar_toolchains_dir"
 }
 
 function fbar_king_env {
@@ -54,7 +56,24 @@ function fbar_tl_king {
     fi
 }
 
+function __fbfr_search_toolchain {
+    local fbar_check_key=$(echo "$1" | grep "^TOOLCHAIN_")
+    if [ "$fbar_check_key" != "" ];then
+        local fbar_search_toolchain="$2/$4"
+        if [ -f "${fbar_search_toolchain}/toolchain.sh" ];then
+            export FBAU_TOOLCHAIN_DIR="$fbar_search_toolchain"
+            . ${fbar_search_toolchain}/toolchain.sh
+            return 1
+        else
+            return 0
+        fi
+    else
+        return 0
+    fi
+}
+
 function fbar_attendant_env {
+    local fbar_toolchain=$(fbfu_fbc_parse "TOOLCHAIN")
     export FBAU_NODE_BUILD_DIR="${fbar_template_build}/${FBAU_CURRENT_NODE_NAME}"
     export FBAU_IPK_WORKDIR="${FBAU_NODE_BUILD_DIR}/ipk"
     export FBAU_IPK_ROOT="${FBAU_IPK_WORKDIR}/ipk_build"
@@ -81,6 +100,9 @@ function fbar_attendant_env {
     fi
     mkdir -p $FBAU_IPK_WORKDIR
     mkdir -p $FBAU_IPK_ROOT
+    if [ "$fbar_toolchain" != "" ];then
+        fbfu_fbc_foreach " __fbfr_search_toolchain" "$fbar_toolchain"
+    fi
 }
 
 function fbar_tl_attendant {
