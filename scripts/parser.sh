@@ -373,7 +373,7 @@ function fbfu_json_partition {
 function fbfu_parse_partition {
     local fbar_result=0
     local fbar_partition=$1
-    if [ "$partition" == "" ];then
+    if [ "$fbar_partition" == "" ];then
         return 1
     fi
     fbar_init_partition_struct
