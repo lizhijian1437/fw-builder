@@ -136,9 +136,15 @@ function fbfu_expand_list_init {
 #@param 需要取出值的序号
 #@return 返回扩展列表
 function fbfu_expand_list_get {
-    local fbar_value=$(echo "$1" | sed -n "$2p")
+    local fbar_expand_list="$1"
+    local fbar_index="$2"
+    if [ "$fbar_expand_list" == "" ] || [ "$fbar_index" == "" ];then
+        return 1
+    fi
+    local fbar_value=$(echo "$fbar_expand_list" | sed -n "${fbar_index}p")
     fbar_value=$(fbfu_string_slim "$fbar_value")
     fbfu_convert_variable "$fbar_value"
+    return 0
 }
 
 #@brief 遍历扩展列表
