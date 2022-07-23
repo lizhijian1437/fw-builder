@@ -102,21 +102,21 @@ function fbfu_convert_variable {
 #@brief 打印消息
 #@param 需要打印的消息
 function fbfu_info {
-    local content="[INFO]  $(date '+%Y-%m-%d %H:%M:%S') $@"
+    local content="[INFO] $(date '+%Y-%m-%d %H:%M:%S') $@"
     echo -e "\033[32m${content}\033[0m"
 }
 
 #@brief 打印警告
 #@param 需要打印的消息
 function fbfu_warn {
-    local content="[WARN]  $(date '+%Y-%m-%d %H:%M:%S') $@"
+    local content="[WARN] $(date '+%Y-%m-%d %H:%M:%S') $@"
     echo -e "\033[33m${content}\033[0m"
 }
 
 #@brief 打印异常
 #@param 需要打印的消息
 function fbfu_error {
-    local content="[ERROR] $(date '+%Y-%m-%d %H:%M:%S') $@"
+    local content="[ERROR]$(date '+%Y-%m-%d %H:%M:%S') $@"
     echo -e "\033[31m${content}\033[0m"
 }
 
