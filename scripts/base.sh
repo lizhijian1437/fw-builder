@@ -242,12 +242,12 @@ function fbfu_kvlist_foreach {
     eval local fbar_sum_value=\$\{${fbar_sum}\}
     while [ "$fbar_m" -lt "$fbar_sum_value" ];do
         eval local fbar_next=\$\{${fbar_list}\[${fbar_m}\]\}
-        local fbar_key=$(echo "$fbar_next" | sed -e 's/|.*$//')
+        local fbar_key=$(echo "$fbar_next" | sed -e 's/!.*$//')
         if [ "$fbar_key" == "$fbar_next" ];then
             fbar_m=$[ "$fbar_m" + 1 ]
             continue
         fi
-        local fbar_value=$(echo "$fbar_next" | sed -e 's/^.*|//')
+        local fbar_value=$(echo "$fbar_next" | sed -e 's/^.*!//')
         $fbar_hook "$fbar_key" "$fbar_value" "$fbar_m" "$fbar_args"
         fbar_result="$?"
         if [ "$fbar_result" != "0" ];then
@@ -291,7 +291,7 @@ function fbfu_kvlist_set {
         fi
         fbfu_cache_list_next "$fbar_list" "$fbar_sum" "$fbar_end" "__fbar_kvlist_next"
     fi
-    eval ${fbar_list}\[${__fbar_kvlist_next}\]=\"${fbar_key}\|${fbar_value}\"
+    eval ${fbar_list}\[${__fbar_kvlist_next}\]=\"${fbar_key}\!${fbar_value}\"
 }
 
 #@brief 获取键值链表中设置的值
@@ -309,7 +309,7 @@ function fbfu_kvlist_get {
     __fbar_kvlist_next=$?
     if [ "$__fbar_kvlist_next" != "0" ];then
         eval local fbar_next=\$\{${fbar_list}\[${__fbar_kvlist_next}\]\}
-        echo "$fbar_next" | sed -e 's/^.*|//'
+        echo "$fbar_next" | sed -e 's/^.*!//'
     fi
 }
 
