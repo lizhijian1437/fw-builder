@@ -37,7 +37,7 @@ fi
 
 fbar_json_partition=$(fbfu_parse_partition "$fbar_partition")
 fbar_result="$?"
-echo "[FW_BUILD]${fbar_json_partition}"
+fbfu_info "[FW_BUILD]${fbar_json_partition}"
 if [ "$fbar_result" == "1" ];then
     fbfu_error "[FW_BUILD]parse PARTITION error"
     exit 1

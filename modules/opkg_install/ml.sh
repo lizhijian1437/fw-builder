@@ -35,7 +35,7 @@ fi
 
 fbar_opkg_package_dir=$(fbfu_parse "$fbar_config" "OPKG_INSTALL_PACKAGE_DIR" "$fbar_temp_path")
 if [ ! -d "$fbar_opkg_package_dir" ];then
-    echo "[OPKG_INSTALL]please set OPKG_INSTALL_PACKAGE_DIR"
+    fbfu_error "[OPKG_INSTALL]please set OPKG_INSTALL_PACKAGE_DIR"
     exit 1
 fi
 
@@ -43,7 +43,7 @@ function __fbar_install_package {
     local fbar_file=$1
     local fbar_file_suffix=${fbar_file##*.}
     if [ "$fbar_file_suffix" == "ipk" ];then
-        echo "[OPKG_INSTALL]install $fbar_file"
+        fbfu_info "[OPKG_INSTALL]install $fbar_file"
         $fbar_opkg -o "$fbar_opkg_root" -add-arch all:1 -add-arch noarch:1 -add-arch "$fbar_opkg_arch:100" install "$fbar_file" --nodeps
     fi
     return 0
