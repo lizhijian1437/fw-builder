@@ -33,7 +33,7 @@ fbar_template_suffix="tl.sh"
 FBAR_MODULE_SUFFIX="ml.sh"
 FBAR_BUILD_DIR="${FBAU_PROJECT}/build"
 FBAR_TEMP_DIR="${FBAR_BUILD_DIR}/tmp"
-fbar_hook="${FBAR_BUILD_DIR}/tmp/__hook_sh"
+FBAU_HOOK="${FBAR_BUILD_DIR}/tmp/__hook_sh"
 fbar_main_node="${FBAU_PROJECT}/${FBAU_NODE_SUFFIX}"
 fbar_nodes_dir="${FBAU_PROJECT}/nodes"
 fbar_modules_dir="${fbar_root}/modules"
@@ -84,13 +84,6 @@ function fbfr_node_search {
     fi
 }
 
-function fbfr_gen_hook {
-    echo "$1" > $fbar_hook
-    if [ "$?" != "0" ];then
-        exit 1
-    fi
-}
-
 function fbfr_handle_node {
     local fbar_m=0
     local fbar_value=""
@@ -106,10 +99,10 @@ function fbfr_handle_node {
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
             fbfu_info "[${fbar_node_name}]IN"
-            fbar_tl_king "IN"
+            fbfr_tl_king "IN"
         else
             fbfu_info "[${fbar_node_name}]IN"
-            fbar_tl_attendant "IN"
+            fbfr_tl_attendant "IN"
         fi
     fi
     local fbar_node_depend=($(fbfu_parse "$fbar_next_node" "DEPEND" "$FBAR_TEMP_DIR"))
@@ -133,10 +126,10 @@ function fbfr_handle_node {
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
             fbfu_info "[${fbar_node_name}]OUT"
-            fbar_tl_king "OUT"
+            fbfr_tl_king "OUT"
         else
             fbfu_info "[${fbar_node_name}]OUT"
-            fbar_tl_attendant "OUT"
+            fbfr_tl_attendant "OUT"
         fi
     fi
     return 0
