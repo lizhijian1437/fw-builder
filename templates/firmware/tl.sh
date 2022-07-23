@@ -14,6 +14,7 @@ function fbfr_search_arch {
 
 function fbar_king_init {
     local fbar_toolchains_dir="${FBAU_PROJECT}/toolchains"
+    fbfu_fbc_set "TOOLCHAIN_BASE" "$fbar_toolchains_dir"
     export FBAU_NODE_BUILD_DIR="${fbar_template_build}/${FBAU_CURRENT_NODE_NAME}"
     export FBAU_PACKAGE_OUT="${FBAU_NODE_BUILD_DIR}/out"
     export FBAU_ROOTFS_ROOT="${FBAU_NODE_BUILD_DIR}/rootfs"
@@ -34,7 +35,6 @@ function fbar_king_init {
         rm -rf $FBAU_IPK_INSTALL_DIR
     fi
     mkdir -p $FBAU_IPK_INSTALL_DIR
-    fbfu_fbc_set "TOOLCHAIN_BASE" "$fbar_toolchains_dir"
 }
 
 function fbar_king_env {
@@ -42,11 +42,10 @@ function fbar_king_env {
 }
 
 function fbar_tl_king {
-    if [ "$1" == "INIT" ];then
+    if [ "$1" == "IN" ];then
         fbar_king_init
-    elif [ "$1" == "ENV" ];then
+    elif [ "$1" == "OUT" ];then
         fbar_king_env
-    elif [ "$1" == "START" ];then
         if [ "$FBAU_DEFAULT_ARCH" == "" ];then
             fbfr_search_arch
         fi
@@ -106,9 +105,8 @@ function fbar_attendant_env {
 }
 
 function fbar_tl_attendant {
-    if [ "$1" == "ENV" ];then
+    if [ "$1" == "OUT" ];then
         fbar_attendant_env
-    elif [ "$1" == "START" ];then
         if [ "$fbar_ipk_rebuild" == "true" ];then
             fbfu_info "[${FBAU_CURRENT_NODE_NAME}]BUILD PACKAGE"
             fbfu_fbc_module "ipk_build" "${FBAR_TEMPLATE}/config/ipk-build.n"
