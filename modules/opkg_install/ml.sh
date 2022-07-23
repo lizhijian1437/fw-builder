@@ -44,7 +44,7 @@ function __fbar_install_package {
     local fbar_file_name=${fbar_file##*/}
     local fbar_file_suffix=${fbar_file##*.}
     if [ "$fbar_file_suffix" == "ipk" ];then
-        fbfu_info "[OPKG_INSTALL]install $fbar_file_name"
+        echo "[OPKG_INSTALL]install $fbar_file_name"
         $fbar_opkg -o "$fbar_opkg_root" -add-arch all:1 -add-arch noarch:1 -add-arch "$fbar_opkg_arch:100" install "$fbar_file" --nodeps
     fi
     return 0
