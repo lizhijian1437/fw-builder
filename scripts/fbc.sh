@@ -90,3 +90,11 @@ function fbfu_fbc_parse {
     return "$?"
 }
 
+#@brief fw-builder生成HOOK接口
+#@param hook字符串
+function fbfu_fbc_gen_hook {
+    echo "$1" > $FBAU_HOOK
+    if [ "$?" != "0" ];then
+        exit 1
+    fi
+}
