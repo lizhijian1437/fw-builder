@@ -58,19 +58,24 @@ function fbfr_OPKG_RMPKG {
 function fbfr_tl_king {
     if [ "$1" == "IN" ];then
         local fbar_value=""
+        fbar_stage_args=$(fbfu_fbc_get "STAGE_ARGS")
+        fbar_stage_args=$(fbfu_expand_list_init "$fbar_stage_args")
+        FBAU_STAGE=$(fbfu_expand_list_get "$fbar_stage_args" "2")
         export FBAU_NODE_BUILD_DIR="${fbar_template_build}/${FBAU_CURRENT_NODE_NAME}"
         export FBAU_PACKAGE_OUT="${FBAU_NODE_BUILD_DIR}/out"
         export FBAU_ROOTFS_ROOT="${FBAU_NODE_BUILD_DIR}/rootfs"
         export FBAU_IPK_INSTALL_DIR="${FBAU_NODE_BUILD_DIR}/ipk_install"
         fbfu_fbc_set "TOOLCHAIN_BASE" "${FBAU_PROJECT}/toolchains"
-        if [ -d "$FBAU_PACKAGE_OUT" ];then
-            rm -rf $FBAU_PACKAGE_OUT
-        fi
-        if [ -d "$FBAU_ROOTFS_ROOT" ];then
-            rm -rf $FBAU_ROOTFS_ROOT
-        fi
-        if [ -d "$FBAU_IPK_INSTALL_DIR" ];then
-            rm -rf $FBAU_IPK_INSTALL_DIR
+        if [ "$FBAU_STAGE" == "" ];then
+            if [ -d "$FBAU_PACKAGE_OUT" ];then
+                rm -rf $FBAU_PACKAGE_OUT
+            fi
+            if [ -d "$FBAU_ROOTFS_ROOT" ];then
+                rm -rf $FBAU_ROOTFS_ROOT
+            fi
+            if [ -d "$FBAU_IPK_INSTALL_DIR" ];then
+                rm -rf $FBAU_IPK_INSTALL_DIR
+            fi
         fi
         mkdir -p $FBAU_PACKAGE_OUT
         mkdir -p $FBAU_ROOTFS_ROOT
@@ -83,11 +88,17 @@ function fbfr_tl_king {
         fi
         fbar_value=$(fbfu_fbc_parse "TRACE")
 #OPKG_RMPKG阶段
-        fbfr_OPKG_RMPKG "$fbar_value"
+        if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "OPKG_RMPKG" ];then
+            fbfr_OPKG_RMPKG "$fbar_value"
+        fi
 #OPKG_INSTALL阶段
-        fbfr_OPKG_INSTALL "$fbar_value"
+        if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "OPKG_INSTALL" ];then
+            fbfr_OPKG_INSTALL "$fbar_value"
+        fi
 #FW_BUILD阶段
-        fbfr_FW_BUILD "$fbar_value"
+        if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "OPKG_INSTALL" ];then
+            fbfr_FW_BUILD "$fbar_value"
+        fi
     fi
 }
 
@@ -146,6 +157,19 @@ function fbfr_IPK_BUILD {
     fi
 }
 
+function fbfr_check_ipk_build_vaild {
+    local fbar_m=3
+    local fbar_next=$(fbfu_expand_list_get "$fbar_stage_args" "$fbar_m")
+    while [ "$fbar_next" != "" ];do
+        if [ "$fbar_next" == "$FBAU_CURRENT_NODE_NAME" ];then
+            return 1
+        fi
+        fbar_m=$[ "$fbar_m" + 1 ]
+        fbar_next=$(fbfu_expand_list_get "$fbar_stage_args" "$fbar_m")
+    done
+    return 0
+}
+
 function fbfr_tl_attendant {
     if [ "$1" == "OUT" ];then
         local fbar_value=""
@@ -153,6 +177,16 @@ function fbfr_tl_attendant {
         export FBAU_NODE_BUILD_DIR="${fbar_template_build}/${FBAU_CURRENT_NODE_NAME}"
         export FBAU_IPK_WORKDIR="${FBAU_NODE_BUILD_DIR}/ipk"
         export FBAU_IPK_ROOT="${FBAU_IPK_WORKDIR}/ipk_build"
+        if [ "$FBAU_STAGE" != "" ];then
+            if [ "$FBAU_STAGE" != "IPK_BUILD" ];then
+                return
+            else
+                fbfr_check_ipk_build_vaild
+                if [ "$?" != "1" ];then
+                    return
+                fi
+            fi
+        fi
 #搜索ARCH
         if [ "$FBAU_DEFAULT_ARCH" == "" ];then
             fbfr_search_arch
