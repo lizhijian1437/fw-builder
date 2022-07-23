@@ -89,14 +89,17 @@ function fbfr_tl_king {
         fbar_value=$(fbfu_fbc_parse "TRACE")
 #OPKG_RMPKG阶段
         if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "OPKG_RMPKG" ];then
+            fbfu_info "OPKG_RMPKG"
             fbfr_OPKG_RMPKG "$fbar_value"
         fi
 #OPKG_INSTALL阶段
         if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "OPKG_INSTALL" ];then
+            fbfu_info "OPKG_INSTALL"
             fbfr_OPKG_INSTALL "$fbar_value"
         fi
 #FW_BUILD阶段
-        if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "OPKG_INSTALL" ];then
+        if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "FW_BUILD" ];then
+            fbfu_info "FW_BUILD"
             fbfr_FW_BUILD "$fbar_value"
         fi
     fi
