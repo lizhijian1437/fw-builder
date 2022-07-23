@@ -58,6 +58,17 @@ function fbfr_fbc_init {
 
 fbfr_fbc_init
 
+while [ "$#" != "0" ]; do
+    fbar_next_args=$(fbfu_expand_list_init "$1")
+    fbar_args_key=$(fbfu_expand_list_get "$fbar_next_args" "1")
+    if [ "$fbar_args_key" == "" ];then
+        shift
+        continue
+    fi
+    fbfu_fbc_set "${fbar_args_key}_ARGS" "$1"
+    shift
+done
+
 function fbfr_node_search {
     local fbar_check_key=$(echo "$1" | grep "^NPATH_")
     if [ "$fbar_check_key" != "" ];then
