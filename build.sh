@@ -93,23 +93,17 @@ function fbfr_handle_node {
     export FBAU_CURRENT_NODE_PATH="$fbar_custom_path"
     export FBAU_CURRENT_NODE_NAME="$fbar_node_name"
     if [ -f "${fbar_node_chain}/${fbar_node_name}" ];then
-        fbfu_warn "[${fbar_node_name}]REPEAT"
         return 0
     fi
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
-            fbfu_info "[${fbar_node_name}]IN"
             fbfr_tl_king "IN"
         else
-            fbfu_info "[${fbar_node_name}]IN"
             fbfr_tl_attendant "IN"
         fi
     fi
     local fbar_node_depend=($(fbfu_parse "$fbar_next_node" "DEPEND" "$FBAR_TEMP_DIR"))
     local fbar_rdsize=${#fbar_node_depend[@]}
-    if [ "$fbar_rdsize" -gt "0" ];then
-        fbfu_info "[${fbar_node_name}]DEPEND ${fbar_node_depend[@]}"
-    fi
     while [ "$fbar_m" -lt "$fbar_rdsize" ];do
         local fbar_next_depend=${fbar_node_depend[$fbar_m]}
         local fbar_next_depend_node=$(fbfu_fbc_foreach "fbfr_node_search" "$fbar_next_depend")
@@ -125,10 +119,8 @@ function fbfr_handle_node {
     fbfu_force_touch "${fbar_node_chain}/${fbar_node_name}"
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
-            fbfu_info "[${fbar_node_name}]OUT"
             fbfr_tl_king "OUT"
         else
-            fbfu_info "[${fbar_node_name}]OUT"
             fbfr_tl_attendant "OUT"
         fi
     fi
@@ -163,10 +155,6 @@ function fbfr_import_template {
 function fbfr_node_frame {
     if [ -d "$fbar_node_temp" ];then
         rm -rf "$fbar_node_temp"
-        if [ "$?" != "0" ];then
-            fbfu_error "remove ${fbar_node_temp} error"
-            exit 1
-        fi
     fi
     mkdir -p $fbar_node_chain
     fbfr_handle_node "$fbar_main_node"
