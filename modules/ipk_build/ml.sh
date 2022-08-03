@@ -39,27 +39,29 @@ if [ ! -f "$fbar_control" ];then
         fbfu_error "[IPK]can't create control file"
         exit 1
     fi
-    fbar_package_name=$(fbfu_parse "$fbar_config" "IPK_PACKAGE_NAME" "$fbar_temp_path")
-    if [ "$fbar_package_name" == "" ];then
-        fbfu_error "[IPK]please provide package name"
-        exit 1
-    fi
-    fbar_package_version=$(fbfu_parse "$fbar_config" "IPK_PACKAGE_VERSION" "$fbar_temp_path")
-    if [ "$fbar_package_version" == "" ];then
-        fbfu_error "[IPK]please provide package version"
-        exit 1
-    fi
-    fbar_arch=$(fbfu_parse "$fbar_config" "IPK_PACKAGE_ARCH" "$fbar_temp_path")
-    if [ "$fbar_arch" == "" ];then
-        fbfu_error "[IPK]please provide package arch"
-        exit 1
-    fi
-    chmod 755 $fbar_control 1>/dev/null 2>&1
-    echo "Architecture: $fbar_arch" >> $fbar_control
-    echo "Package: $fbar_package_name" >> $fbar_control
-    echo "Version: $fbar_package_version" >> $fbar_control
-    echo "$fbar_package_name $fbar_package_version $fbar_arch"
+
 fi
+
+fbar_package_name=$(fbfu_parse "$fbar_config" "IPK_PACKAGE_NAME" "$fbar_temp_path")
+if [ "$fbar_package_name" == "" ];then
+    fbfu_error "[IPK]please provide package name"
+    exit 1
+fi
+fbar_package_version=$(fbfu_parse "$fbar_config" "IPK_PACKAGE_VERSION" "$fbar_temp_path")
+if [ "$fbar_package_version" == "" ];then
+    fbfu_error "[IPK]please provide package version"
+    exit 1
+fi
+fbar_arch=$(fbfu_parse "$fbar_config" "IPK_PACKAGE_ARCH" "$fbar_temp_path")
+if [ "$fbar_arch" == "" ];then
+    fbfu_error "[IPK]please provide package arch"
+    exit 1
+fi
+chmod 755 $fbar_control 1>/dev/null 2>&1
+echo "Architecture: $fbar_arch" >> $fbar_control
+echo "Package: $fbar_package_name" >> $fbar_control
+echo "Version: $fbar_package_version" >> $fbar_control
+echo "$fbar_package_name $fbar_package_version $fbar_arch"
 
 function fbar_required_field
 {
