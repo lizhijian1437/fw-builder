@@ -92,6 +92,7 @@ function fbfr_handle_node {
     local fbar_node_name=${fbar_custom_path##*/}
     export FBAU_CURRENT_NODE_PATH="$fbar_custom_path"
     export FBAU_CURRENT_NODE_NAME="$fbar_node_name"
+    cd $FBAU_CURRENT_NODE_PATH
     if [ -f "${fbar_node_chain}/${fbar_node_name}" ];then
         return 0
     fi
@@ -116,6 +117,7 @@ function fbfr_handle_node {
     done
     export FBAU_CURRENT_NODE_PATH="$fbar_custom_path"
     export FBAU_CURRENT_NODE_NAME="$fbar_node_name"
+    cd $FBAU_CURRENT_NODE_PATH
     fbfu_force_touch "${fbar_node_chain}/${fbar_node_name}"
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
