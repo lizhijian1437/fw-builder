@@ -14,7 +14,7 @@
 ## 使用环境
 
 ```
-支持build-essential、git、perl、sed、awk、grep
+支持build-essential、cmake、git、perl、sed、awk、grep
 ```
 
 ## 案例
