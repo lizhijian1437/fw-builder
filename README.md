@@ -88,3 +88,5 @@ FBAU_PROJECT: 项目目录
 FBAU_CURRENT_NODE_PATH: 当前工作节点的目录(当节点工作时，工作目录也在该目录)
 
 FBAU_CURRENT_NODE_NAME: 当前工作节点的名称
+
+其他模版的使用方法见[Wiki](https://github.com/lizhijian1437/fw-builder/wiki)
