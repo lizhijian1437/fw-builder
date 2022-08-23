@@ -35,7 +35,8 @@ if [ ! -f "$fbar_output" ];then
     exit 1
 fi
 
-fbar_json_partition=$(fbfu_parse_partition "$fbar_partition")
+fbar_firmware_size=$(fbfu_parse "$fbar_config" "FIRMWARE_SIZE" "$fbar_temp_path")
+fbar_json_partition=$(fbfu_parse_partition "$fbar_partition" "$fbar_firmware_size")
 fbar_result="$?"
 if [ "$fbar_result" == "1" ];then
     fbfu_error "[FW_BUILD]parse PARTITION error"
