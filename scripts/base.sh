@@ -149,25 +149,24 @@ function fbfu_expand_list_get {
 
 #@brief 遍历扩展列表
 #@param 扩展列表
-#@param 起始序号
-#@param 结束序号
 #@param 回调函数($1:值 $2:序号 $3:私有参数)
 #@param 私有参数
 #@return 若回调函数返回非0值，则会停止遍历，并且返回该值，否则会返回0
 function fbfu_expand_list_foreach {
+    local fbar_begin=1
     local fbar_expand_list=$1
-    local fbar_begin=$2
-    local fbar_end=$3
-    local fbar_hook=$4
-    local fbar_args=$5
+    local fbar_hook=$2
+    local fbar_args=$3
     local fbar_result=0
-    while [ "$fbar_begin" -le "$fbar_end" ];do
-        local fbar_next=$(fbfu_expand_list_get "$fbar_expand_list" "$fbar_begin")
+    local fbar_next=$(fbfu_expand_list_get "$fbar_expand_list" "$fbar_begin")
+    fbar_begin=$[ "$fbar_begin" + 1 ]
+    while [ "$fbar_next" != "" ];do
         $fbar_hook "$fbar_next" "$fbar_begin" "$fbar_args"
         fbar_result="$?"
         if [ "$fbar_result" != "0" ];then
             return "$fbar_result"
         fi
+        fbar_next=$(fbfu_expand_list_get "$fbar_expand_list" "$fbar_begin")
         fbar_begin=$[ "$fbar_begin" + 1 ]
     done
     return 0
@@ -417,4 +416,59 @@ function fbfu_fill_file {
     else
         return 1
     fi
+}
+
+#@brief 备份环境变量 
+#@param 环境变量名称
+#@return 正常备份返回0，备份异常返回1
+function fbfu_backup_env {
+    local fbar_name=$1
+    if [ "$fbar_name" == "" ];then
+        return 1
+    fi
+    eval __fbar_${fbar_name}_backup=\$\{${fbar_name}\}
+    return 0
+}
+
+#@brief 恢复备份的环境变量 
+#@param 环境变量名称
+#@return 正常恢复返回0，备份恢复返回1
+function fbfu_recovery_env {
+    local fbar_name=$1
+    if [ "$fbar_name" == "" ];then
+        return 1
+    fi
+    eval ${fbar_name}=\$\{__fbar_${fbar_name}_backup\}
+    return 0
+}
+
+function __fbfu_backup_env_list {
+    fbfu_backup_env "$1"
+}
+
+#@brief 备份环境列表
+#@param 环境变量列表
+#@return 正常备份返回0，备份异常返回1
+function fbfu_backup_env_list {
+    local fbar_list=$1
+    if [ "$fbar_list" == "" ];then
+        return 1
+    fi
+    __fbar_expand_list=$(fbfu_expand_list_init "$fbar_list")
+    fbfu_expand_list_foreach "$__fbar_expand_list" "__fbfu_backup_env_list"
+    return 0
+}
+
+function __fbfu_recovery_env_list {
+    fbfu_recovery_env "$1"
+}
+
+#@brief 恢复环境列表
+#@return 正常恢复返回0，备份恢复返回1
+function fbfu_recovery_env_list {
+    if [ "$__fbar_expand_list" == "" ];then
+        return 1
+    fi
+    fbfu_expand_list_foreach "$__fbar_expand_list" "__fbfu_recovery_env_list"
+    return 0
 }
