@@ -40,6 +40,7 @@ fbar_json_partition=$(fbfu_parse_partition "$fbar_partition" "$fbar_firmware_siz
 fbar_result="$?"
 if [ "$fbar_result" == "1" ];then
     fbfu_error "[FW_BUILD]parse PARTITION error"
+    fbfu_error "${fbar_json_partition}"
     exit 1
 fi
 
@@ -60,9 +61,9 @@ function __fbfr_analysis_partition {
     if [ ! -f "$fbar_source" ];then
         fbar_target="${fbar_fw_temp_path}/fill"
         fbfu_fill_file "$fbar_size" "$fbar_source" "$fbar_target"
-        echo "begin:${fbar_begin_hex} end:${fbar_end_hex} target:FILL_${fbar_source}"
+        echo "begin:${fbar_begin_hex} end:${fbar_end_hex} target:FILL_${fbar_source} size:${fbar_size}"
     else
-        echo "begin:${fbar_begin_hex} end:${fbar_end_hex} target:${fbar_target}"
+        echo "begin:${fbar_begin_hex} end:${fbar_end_hex} target:${fbar_target} size:${fbar_size}"
     fi
     ${FBAU_SCRIPTS}/sec_replace.pl -i "$fbar_target" -o "$fbar_output" -a "$fbar_begin"
     json_select ..
