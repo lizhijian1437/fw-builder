@@ -1,14 +1,12 @@
 #!/bin/bash
 
-fbar_template_build="${FBAR_BUILD_DIR}/template"
-
 function fbfr_search_arch {
     local fbar_release_file="${FBAU_ROOTFS_ROOT}/etc/openwrt_release"
     if [ -f "$fbar_release_file" ];then
-        FBAU_DEFAULT_ARCH=$(fbfu_parse_kv "$fbar_release_file" "DISTRIB_ARCH" "=" | sed -e "s/'//g")
+        export FBAU_DEFAULT_ARCH=$(fbfu_parse_kv "$fbar_release_file" "DISTRIB_ARCH" "=" | sed -e "s/'//g")
     fi
     if [ "$FBAU_DEFAULT_ARCH" != "" ];then
-        fbfu_warn "DEFAULT_ARCH:${FBAU_DEFAULT_ARCH}"
+        fbfu_info "DEFAULT_ARCH:${FBAU_DEFAULT_ARCH}"
     fi
 }
 
@@ -35,7 +33,11 @@ function fbfr_OPKG_INSTALL {
         fbfu_fbc_gen_hook "$fbar_value"
         . $FBAU_HOOK "OPKG_INSTALL_BEGIN"
     fi
-    fbfu_fbc_module "opkg_install" "${FBAR_TEMPLATE}/config/opkg.n"
+    if [ "$FBAU_DEFAULT_ARCH" != "" ];then
+        fbfu_fbc_module "opkg_install" "${FBAR_TEMPLATE}/config/opkg.n"
+    else
+        fbfu_warn "[${FBAU_CURRENT_NODE_NAME}]ARCH NOT PROVIDED, NO PACKAGE INSTALL"
+    fi
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
         . $FBAU_HOOK "OPKG_INSTALL_FINISH"
@@ -44,11 +46,16 @@ function fbfr_OPKG_INSTALL {
 
 function fbfr_OPKG_RMPKG {
     local fbar_value="$1"
+    local fbar_ipk_version=$(fbfu_fbc_parse "PACKAGE_VERSION" "${FBAR_TEMPLATE}/config/ipk-build.n")
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
         . $FBAU_HOOK "OPKG_RMPKG_BEGIN"
     fi
-    fbfu_fbc_module "opkg_rmpkg" "${FBAR_TEMPLATE}/config/opkg.n"
+    if [ "$FBAU_DEFAULT_ARCH" != "" ];then
+        fbfu_fbc_module "opkg_rmpkg" "${FBAR_TEMPLATE}/config/opkg.n"
+    else
+        fbfu_warn "[${FBAU_CURRENT_NODE_NAME}]ARCH NOT PROVIDED, NO PACKAGE REMOVE"
+    fi
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
         . $FBAU_HOOK "OPKG_RMPKG_FINISH"
@@ -58,14 +65,18 @@ function fbfr_OPKG_RMPKG {
 function fbfr_tl_king {
     local fbar_value=""
     if [ "$1" == "IN" ];then
+        local fbar_arch=$(fbfu_fbc_parse "ARCH" "${FBAR_TEMPLATE}/config/opkg.n")
         fbar_stage_args=$(fbfu_fbc_get "STAGE_ARGS")
         fbar_stage_args=$(fbfu_expand_list_init "$fbar_stage_args")
         FBAU_STAGE=$(fbfu_expand_list_get "$fbar_stage_args" "2")
-        export FBAU_NODE_BUILD_DIR="${fbar_template_build}/${FBAU_CURRENT_NODE_NAME}"
-        export FBAU_PACKAGE_OUT="${FBAU_NODE_BUILD_DIR}/out"
-        export FBAU_ROOTFS_ROOT="${FBAU_NODE_BUILD_DIR}/rootfs"
-        export FBAU_IPK_INSTALL_DIR="${FBAU_NODE_BUILD_DIR}/ipk_install"
+        export FBAU_PACKAGE_OUT="${FBAU_CURRENT_NODE_BUILD}/out"
+        export FBAU_ROOTFS_ROOT="${FBAU_CURRENT_NODE_BUILD}/rootfs"
+        export FBAU_IPK_TO_ROOTFS="${FBAU_CURRENT_NODE_BUILD}/ipk_install"
         fbfu_fbc_set "TOOLCHAIN_BASE" "${FBAU_PROJECT}/toolchains"
+        if [ "$fbar_arch" != "" ];then
+            export FBAU_DEFAULT_ARCH="$fbar_arch"
+            fbfu_info "DEFAULT_ARCH:${FBAU_DEFAULT_ARCH}"
+        fi
         if [ "$FBAU_STAGE" == "" ];then
             if [ -d "$FBAU_PACKAGE_OUT" ];then
                 rm -rf $FBAU_PACKAGE_OUT
@@ -73,20 +84,19 @@ function fbfr_tl_king {
             if [ -d "$FBAU_ROOTFS_ROOT" ];then
                 rm -rf $FBAU_ROOTFS_ROOT
             fi
-            if [ -d "$FBAU_IPK_INSTALL_DIR" ];then
-                rm -rf $FBAU_IPK_INSTALL_DIR
+            if [ -d "$FBAU_IPK_TO_ROOTFS" ];then
+                rm -rf $FBAU_IPK_TO_ROOTFS
             fi
         fi
         mkdir -p $FBAU_PACKAGE_OUT
         mkdir -p $FBAU_ROOTFS_ROOT
-        mkdir -p $FBAU_IPK_INSTALL_DIR
+        mkdir -p $FBAU_IPK_TO_ROOTFS
         fbar_value=$(fbfu_fbc_parse "TRACE")
         if [ "$?" == "4" ];then
             fbfu_fbc_gen_hook "$fbar_value"
             . $FBAU_HOOK "INIT"
         fi
     elif [ "$1" == "OUT" ];then
-        export FBAU_NODE_BUILD_DIR="${fbar_template_build}/${FBAU_CURRENT_NODE_NAME}"
 #搜索ARCH
         if [ "$FBAU_DEFAULT_ARCH" == "" ];then
             fbfr_search_arch
@@ -153,14 +163,19 @@ function fbfr_IPK_BUILD_clean {
 
 function fbfr_IPK_BUILD {
     local fbar_value="$1"
+    local fbar_ipk_version=$(fbfu_fbc_parse "PACKAGE_VERSION" "${FBAR_TEMPLATE}/config/ipk-build.n")
     fbfr_IPK_BUILD_clean
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
         . $FBAU_HOOK "IPK_BUILD_BEGIN"
     fi
-    if [ "$fbar_ipk_rebuild" == "true" ];then
-        fbfu_info "[${FBAU_CURRENT_NODE_NAME}]BUILD PACKAGE"
-        fbfu_fbc_module "ipk_build" "${FBAR_TEMPLATE}/config/ipk-build.n"
+    if [ "$fbar_ipk_version" != "" ];then
+        if [ "$fbar_ipk_rebuild" == "true" ];then
+            fbfu_info "[${FBAU_CURRENT_NODE_NAME}]BUILD PACKAGE"
+            fbfu_fbc_module "ipk_build" "${FBAR_TEMPLATE}/config/ipk-build.n"
+        fi
+    else
+        fbfu_warn "[${FBAU_CURRENT_NODE_NAME}]NO VERSION IS PROVIDED, NO PACKAGE IS MADE"
     fi
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
@@ -185,8 +200,7 @@ function fbfr_tl_attendant {
     if [ "$1" == "OUT" ];then
         local fbar_value=""
         local fbar_toolchain=$(fbfu_fbc_parse "TOOLCHAIN")
-        export FBAU_NODE_BUILD_DIR="${fbar_template_build}/${FBAU_CURRENT_NODE_NAME}"
-        export FBAU_IPK_WORKDIR="${FBAU_NODE_BUILD_DIR}/ipk"
+        export FBAU_IPK_WORKDIR="${FBAU_CURRENT_NODE_BUILD}/ipk"
         export FBAU_IPK_ROOT="${FBAU_IPK_WORKDIR}/ipk_build"
         if [ "$FBAU_STAGE" != "" ];then
             if [ "$FBAU_STAGE" != "IPK_BUILD" ];then
