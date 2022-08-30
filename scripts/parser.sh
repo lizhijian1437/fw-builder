@@ -376,6 +376,7 @@ function fbfu_json_partition {
 function fbfu_parse_partition {
     local fbar_result=0
     local fbar_partition=$1
+    local fbar_max_size=$2
     if [ "$fbar_partition" == "" ];then
         return 1
     fi
@@ -383,7 +384,11 @@ function fbfu_parse_partition {
     fbar_partition_begin[0]="BEGIN"
     fbar_partition_end[0]=-1
     fbfu_string_line_foreach "$fbar_partition" "fbar_init_partition"
-    fbar_partition_begin[$fbar_partition_sum]="END"
+    if [ "$fbar_max_size" == "" ];then
+        fbar_partition_begin[$fbar_partition_sum]="END"
+    else
+        fbar_partition_begin[$fbar_partition_sum]="$fbar_max_size"
+    fi
     fbar_partition_end[$fbar_partition_sum]=-1
     fbar_partition_sum=$[ $fbar_partition_sum + 1]
     if [ "$fbar_partition_sum" -le "2" ];then
