@@ -34,6 +34,7 @@ FBAR_MODULE_SUFFIX="ml.sh"
 FBAR_BUILD_DIR="${FBAU_PROJECT}/build"
 FBAR_TEMP_DIR="${FBAR_BUILD_DIR}/tmp"
 FBAU_HOOK="${FBAR_BUILD_DIR}/tmp/__hook_sh"
+fbar_build_nodes="${FBAR_BUILD_DIR}/nodes"
 fbar_main_node="${FBAU_PROJECT}/${FBAU_NODE_SUFFIX}"
 fbar_nodes_dir="${FBAU_PROJECT}/nodes"
 fbar_modules_dir="${fbar_root}/modules"
@@ -92,12 +93,15 @@ function fbfr_handle_node {
     local fbar_node_name=${fbar_custom_path##*/}
     export FBAU_CURRENT_NODE_PATH="$fbar_custom_path"
     export FBAU_CURRENT_NODE_NAME="$fbar_node_name"
+    export FBAU_CURRENT_NODE_BUILD="${fbar_build_nodes}/${fbar_node_name}"
     cd $FBAU_CURRENT_NODE_PATH
     if [ -f "${fbar_node_chain}/${fbar_node_name}" ];then
         return 0
     fi
+    mkdir -p $FBAU_CURRENT_NODE_BUILD
     if [ "$FBAR_TEMPLATE" != "" ];then
         if [ "$fbar_next_node" == "$fbar_main_node" ];then
+            export FBAU_KING_NODE_BUILD="$FBAU_CURRENT_NODE_BUILD"
             fbfr_tl_king "IN"
         else
             fbfr_tl_attendant "IN"
@@ -117,6 +121,7 @@ function fbfr_handle_node {
     done
     export FBAU_CURRENT_NODE_PATH="$fbar_custom_path"
     export FBAU_CURRENT_NODE_NAME="$fbar_node_name"
+    export FBAU_CURRENT_NODE_BUILD="${fbar_build_nodes}/${fbar_node_name}"
     cd $FBAU_CURRENT_NODE_PATH
     fbfu_force_touch "${fbar_node_chain}/${fbar_node_name}"
     if [ "$FBAR_TEMPLATE" != "" ];then
