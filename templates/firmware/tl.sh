@@ -13,6 +13,7 @@ function fbfr_search_arch {
 function fbfr_FW_BUILD {
     local fbar_value="$1"
     local fbar_partition=$(fbfu_fbc_parse "FIRMWARE_OUTPUT" "${FBAR_TEMPLATE}/config/fw_build.n")
+    local fbar_partition_table=$(fbfu_fbc_parse "PARTITION" "${FBAR_TEMPLATE}/config/fw_build.n")
     if [ -f "$fbar_partition" ];then
         rm -rf "$fbar_partition"
     fi
@@ -20,7 +21,11 @@ function fbfr_FW_BUILD {
         fbfu_fbc_gen_hook "$fbar_value"
         . $FBAU_HOOK "FW_BUILD_BEGIN"
     fi
-    fbfu_fbc_module "fw_build" "${FBAR_TEMPLATE}/config/fw_build.n"
+    if [ "$fbar_partition_table" != "" ];then
+        fbfu_fbc_module "fw_build" "${FBAR_TEMPLATE}/config/fw_build.n"
+    else
+        fbfu_warn "[${FBAU_CURRENT_NODE_NAME}]PARTITION NOT PROVIDED, NO IMAGE BUILD"
+    fi
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
         . $FBAU_HOOK "FW_BUILD_FINISH"
