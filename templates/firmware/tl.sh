@@ -13,6 +13,7 @@ function fbfr_search_arch {
 function fbfr_FW_BUILD {
     local fbar_value="$1"
     local fbar_partition=$(fbfu_fbc_parse "FIRMWARE_OUTPUT" "${FBAR_TEMPLATE}/config/fw_build.n")
+    local fbar_partition_table=$(fbfu_fbc_parse "PARTITION" "${FBAR_TEMPLATE}/config/fw_build.n")
     if [ -f "$fbar_partition" ];then
         rm -rf "$fbar_partition"
     fi
@@ -20,18 +21,22 @@ function fbfr_FW_BUILD {
         fbfu_fbc_gen_hook "$fbar_value"
         . $FBAU_HOOK "FW_BUILD_BEGIN"
     fi
-    fbfu_fbc_module "fw_build" "${FBAR_TEMPLATE}/config/fw_build.n"
+    if [ "$fbar_partition_table" != "" ];then
+        fbfu_fbc_module "fw_build" "${FBAR_TEMPLATE}/config/fw_build.n"
+    else
+        fbfu_warn "[${FBAU_CURRENT_NODE_NAME}]PARTITION NOT PROVIDED, NO IMAGE BUILD"
+    fi
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
         . $FBAU_HOOK "FW_BUILD_FINISH"
     fi
 }
 
-function fbfr_OPKG_INSTALL {
+function fbfr_PKG_INSTALL {
     local fbar_value="$1"
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
-        . $FBAU_HOOK "OPKG_INSTALL_BEGIN"
+        . $FBAU_HOOK "PKG_INSTALL_BEGIN"
     fi
     if [ "$FBAU_DEFAULT_ARCH" != "" ];then
         fbfu_fbc_module "opkg_install" "${FBAR_TEMPLATE}/config/opkg.n"
@@ -40,16 +45,16 @@ function fbfr_OPKG_INSTALL {
     fi
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
-        . $FBAU_HOOK "OPKG_INSTALL_FINISH"
+        . $FBAU_HOOK "PKG_INSTALL_FINISH"
     fi
 }
 
-function fbfr_OPKG_RMPKG {
+function fbfr_RMPKG {
     local fbar_value="$1"
     local fbar_ipk_version=$(fbfu_fbc_parse "PACKAGE_VERSION" "${FBAR_TEMPLATE}/config/ipk-build.n")
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
-        . $FBAU_HOOK "OPKG_RMPKG_BEGIN"
+        . $FBAU_HOOK "RMPKG_BEGIN"
     fi
     if [ "$FBAU_DEFAULT_ARCH" != "" ];then
         fbfu_fbc_module "opkg_rmpkg" "${FBAR_TEMPLATE}/config/opkg.n"
@@ -58,7 +63,7 @@ function fbfr_OPKG_RMPKG {
     fi
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
-        . $FBAU_HOOK "OPKG_RMPKG_FINISH"
+        . $FBAU_HOOK "RMPKG_FINISH"
     fi
 }
 
@@ -105,15 +110,15 @@ function fbfr_tl_king {
         if [ "$?" != "4" ];then
             fbar_value=""
         fi
-#OPKG_RMPKG阶段
-        if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "OPKG_RMPKG" ];then
-            fbfu_info "OPKG_RMPKG"
-            fbfr_OPKG_RMPKG "$fbar_value"
+#RMPKG阶段
+        if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "RMPKG" ];then
+            fbfu_info "RMPKG"
+            fbfr_RMPKG "$fbar_value"
         fi
-#OPKG_INSTALL阶段
-        if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "OPKG_INSTALL" ];then
-            fbfu_info "OPKG_INSTALL"
-            fbfr_OPKG_INSTALL "$fbar_value"
+#PKG_INSTALL阶段
+        if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "PKG_INSTALL" ];then
+            fbfu_info "PKG_INSTALL"
+            fbfr_PKG_INSTALL "$fbar_value"
         fi
 #FW_BUILD阶段
         if [ "$FBAU_STAGE" == "" ] || [ "$FBAU_STAGE" == "FW_BUILD" ];then
@@ -139,7 +144,7 @@ function __fbfr_search_toolchain {
     fi
 }
 
-function fbfr_IPK_BUILD_clean {
+function fbfr_PKG_BUILD_clean {
     local fbar_ipk_out="${FBAU_IPK_WORKDIR}/ipk_out"
     local fbar_output=$(fbfu_fbc_parse "IPK_PACKAGE_OUT" "${FBAR_TEMPLATE}/config/ipk-build.n")
     local fbar_cache=$(fbfu_fbc_parse "IPK_CACHE")
@@ -161,13 +166,13 @@ function fbfr_IPK_BUILD_clean {
     mkdir -p $FBAU_IPK_ROOT
 }
 
-function fbfr_IPK_BUILD {
+function fbfr_PKG_BUILD {
     local fbar_value="$1"
     local fbar_ipk_version=$(fbfu_fbc_parse "PACKAGE_VERSION" "${FBAR_TEMPLATE}/config/ipk-build.n")
-    fbfr_IPK_BUILD_clean
+    fbfr_PKG_BUILD_clean
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
-        . $FBAU_HOOK "IPK_BUILD_BEGIN"
+        . $FBAU_HOOK "PKG_BUILD_BEGIN"
     fi
     if [ "$fbar_ipk_version" != "" ];then
         if [ "$fbar_ipk_rebuild" == "true" ];then
@@ -179,7 +184,7 @@ function fbfr_IPK_BUILD {
     fi
     if [ "$fbar_value" != "" ];then
         fbfu_fbc_gen_hook "$fbar_value"
-        . $FBAU_HOOK "IPK_BUILD_FINISH"
+        . $FBAU_HOOK "PKG_BUILD_FINISH"
     fi
 }
 
@@ -203,7 +208,7 @@ function fbfr_tl_attendant {
         export FBAU_IPK_WORKDIR="${FBAU_CURRENT_NODE_BUILD}/ipk"
         export FBAU_IPK_ROOT="${FBAU_IPK_WORKDIR}/ipk_build"
         if [ "$FBAU_STAGE" != "" ];then
-            if [ "$FBAU_STAGE" != "IPK_BUILD" ];then
+            if [ "$FBAU_STAGE" != "PKG_BUILD" ];then
                 return
             else
                 fbfr_check_ipk_build_vaild
@@ -225,6 +230,6 @@ function fbfr_tl_attendant {
         if [ "$?" != "4" ];then
             fbar_value=""
         fi
-        fbfr_IPK_BUILD "$fbar_value"
+        fbfr_PKG_BUILD "$fbar_value"
     fi
 }

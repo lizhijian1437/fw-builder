@@ -6,6 +6,7 @@
 #fbar 私有参数
 
 fbar_root=$(dirname $(readlink -f $0))
+export FBAU_BUILD_SCRIPT="${fbar_root}/build.sh"
 export FBAU_BIN="${fbar_root}/bin"
 export FBAU_PROJECT=$(pwd)
 export FBAU_SCRIPTS="${fbar_root}/scripts"
