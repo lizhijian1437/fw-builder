@@ -5,6 +5,9 @@
 #fbau 公有参数
 #fbar 私有参数
 
+#@brief 换行符
+FBAU_NEWLINE_SYMBOL=$'\n'
+
 #@brief 相对路径转换
 #@param 绝对路径
 #@param 相对路径
