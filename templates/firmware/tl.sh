@@ -147,7 +147,7 @@ function __fbfr_search_toolchain {
 function fbfr_PKG_BUILD_clean {
     local fbar_ipk_out="${FBAU_IPK_WORKDIR}/ipk_out"
     local fbar_output=$(fbfu_fbc_parse "IPK_PACKAGE_OUT" "${FBAR_TEMPLATE}/config/ipk-build.n")
-    local fbar_cache=$(fbfu_fbc_parse "IPK_CACHE")
+    local fbar_cache=$(fbfu_fbc_parse "PKG_CACHE")
     fbar_ipk_rebuild="true"
     if [ "$fbar_cache" == "true" ] && [ -f "${fbar_ipk_out}/ipk_build_ok" ];then
         fbar_ipk_rebuild="false"
