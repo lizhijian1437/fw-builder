@@ -86,15 +86,43 @@ function fbfu_fbc_parse {
     if [ ! -f "$fbar_config" ];then
         fbar_config="${FBAU_CURRENT_NODE_PATH}/${FBAU_NODE_SUFFIX}"
     fi
-    fbfu_parse "$fbar_config" "$fbar_key" "$FBAR_TEMP_DIR"
+    fbfu_parse "$fbar_config" "$fbar_key"
     return "$?"
 }
 
 #@brief fw-builder生成HOOK接口
 #@param hook字符串
 function fbfu_fbc_gen_hook {
+    mkdir -p $FBAR_TEMP_DIR
     echo "$1" > $FBAU_HOOK
     if [ "$?" != "0" ];then
         exit 1
+    fi
+}
+
+#@brief fw-builder获取参数列表接口
+#@param 参数名
+#@return 若参数存在，则返回参数列表
+function fbfu_fbc_args_list {
+    local fbar_key=$1
+    local fbar_list=""
+    if [ "$fbar_key" != "" ];then
+        fbar_list=$(fbfu_fbc_get "${fbar_key}_ARGS")
+        if [ "$fbar_list" != "" ];then
+            fbfu_expand_list_init "$fbar_list"
+        fi
+    fi
+}
+
+#@brief fw-builder从参数列表获取指定参数接口
+#@param 参数列表
+#@param 参数的序号
+#@return 若参数存在，则返回该指定参数
+function fbfu_fbc_args_switch {
+    local fbar_list=$1
+    local fbar_index=$2
+    if [ "$fbar_list" != "" ] && [ "$fbar_index" != "" ];then
+        fbar_index=$[ "$fbar_index" + 1 ]
+        fbfu_expand_list_get "$fbar_list" "$fbar_index"
     fi
 }
