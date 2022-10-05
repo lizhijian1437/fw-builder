@@ -108,7 +108,7 @@ function fbfr_handle_node {
             fbfr_tl_attendant "IN"
         fi
     fi
-    local fbar_node_depend=($(fbfu_parse "$fbar_next_node" "DEPEND" "$FBAR_TEMP_DIR"))
+    local fbar_node_depend=($(fbfu_parse "$fbar_next_node" "DEPEND"))
     local fbar_rdsize=${#fbar_node_depend[@]}
     while [ "$fbar_m" -lt "$fbar_rdsize" ];do
         local fbar_next_depend=${fbar_node_depend[$fbar_m]}
@@ -153,7 +153,7 @@ function fbfr_template_search {
 }
 
 function fbfr_import_template {
-    local fbar_value=$(fbfu_parse "$fbar_main_node" "TEMPLATE" "$FBAR_TEMP_DIR")
+    local fbar_value=$(fbfu_parse "$fbar_main_node" "TEMPLATE")
     if [ "$fbar_value" == "" ];then
         return
     fi

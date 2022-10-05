@@ -164,7 +164,6 @@ function fbfu_parse {
     local fbar_file=$1
     local fbar_key=$2
     local fbar_result=""
-    local fbar_temp_path=$3
     local fbar_check_section=""
     local fbar_command=""
     if [ ! -f "$fbar_file" ] || [ "$fbar_key" == "" ];then
@@ -177,7 +176,7 @@ function fbfu_parse {
     local fbar_next=$(fbfu_parse_kv "$fbar_file" "__NEXT_CONFIG" ":=")
     fbar_next=$(fbfu_convert_variable "$fbar_next")
     if [  -f "$fbar_next" ];then
-        fbar_value=$(fbfu_parse "$fbar_next" "$fbar_key" "$fbar_temp_path")
+        fbar_value=$(fbfu_parse "$fbar_next" "$fbar_key")
         fbar_result="$?"
         if [ "$fbar_result" != "1" ];then
             echo "$fbar_value"
@@ -200,9 +199,6 @@ function fbfu_parse {
     fi
     fbar_check_section=$(echo "$fbar_value" | grep '^{')
     if [ "$fbar_check_section" != "" ];then
-        if [ ! -d "$fbar_temp_path" ];then
-            return 1
-        fi
         fbar_value=$(fbfu_parse_section "$fbar_file" "$fbar_key" "{" "}")
         if [ "$fbar_value" == "" ];then
             return 1
